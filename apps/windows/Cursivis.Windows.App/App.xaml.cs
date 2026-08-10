@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using Cursivis.Windows.Platform.Instance;
+using Cursivis.Windows.Platform.Security;
 using Microsoft.UI.Dispatching;
 
 using Microsoft.UI.Xaml;
@@ -52,6 +53,11 @@ public partial class App : Microsoft.UI.Xaml.Application
                 return;
             }
 
+            // Make a securely saved Gemini key available before any provider or
+            // hotkey-driven selection flow is initialized. Environment variables
+            // supplied by the caller still take precedence.
+            _ = await WindowsGeminiCredentialStore.LoadIntoProcessEnvironmentAsync();
+
             var mainWindow = new MainWindow();
             _window = mainWindow;
             _window.Closed += OnMainWindowClosed;
@@ -64,7 +70,9 @@ public partial class App : Microsoft.UI.Xaml.Application
 
                 bool backgroundStartup = Environment.GetCommandLineArgs().Any(
                     argument => string.Equals(argument, "--background", StringComparison.OrdinalIgnoreCase));
-                if (backgroundStartup && runtime.CredentialManager.HasSavedKey)
+                bool hasGeminiKey = WindowsGeminiCredentialStore.CreateManager().HasSavedKey ||
+                    !string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("GEMINI_API_KEY"));
+                if (backgroundStartup && (hasGeminiKey || runtime.CredentialManager.HasSavedKey))
                 {
                     mainWindow.HideForBackgroundStartup();
                 }
