@@ -1,10 +1,10 @@
-using System.Security.Cryptography;
+using System.Net.Http.Headers;
 using System.Runtime.InteropServices;
+using System.Security.Cryptography;
+using System.Text;
+using System.Text.Json;
 using Cursivis.Contracts.OpenAI;
-using Cursivis.Domain.Models;
-using Cursivis.Domain.Settings;
 using Cursivis.Infrastructure.Storage.Security;
-using Cursivis.Windows.App.Helpers;
 using Cursivis.Windows.Platform.Security;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -13,7 +13,9 @@ namespace Cursivis.Windows.App.Pages;
 
 public sealed partial class OpenAiPage : Page
 {
-    private bool _loadingModels;
+    private static readonly HttpClient Http = new() { Timeout = TimeSpan.FromSeconds(15) };
+    private readonly WindowsGeminiCredentialManager _geminiCredentials =
+        WindowsGeminiCredentialStore.CreateManager();
 
     public OpenAiPage()
     {
@@ -23,155 +25,44 @@ public sealed partial class OpenAiPage : Page
 
     private void OnLoaded(object sender, RoutedEventArgs args)
     {
-        AppRuntime? runtime = App.CurrentRuntime;
-        OpenAiKeyInput.IsSecureStorageAvailable = runtime is not null && OperatingSystem.IsWindows();
-        OpenAiKeyInput.HasSavedKey = runtime?.CredentialManager.HasSavedKey == true;
-        if (OpenAiKeyInput.HasSavedKey)
-        {
-            OpenAiHeader.StatusText = ResourceText.Get("OpenAiSavedStatus");
-            OpenAiHeader.StatusDetail = ResourceText.Get("OpenAiSavedStatusDetail");
-        }
+        GeminiKeyInput.IsSecureStorageAvailable = OperatingSystem.IsWindows();
+        GeminiKeyInput.HasSavedKey = _geminiCredentials.HasSavedKey ||
+            !string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("GEMINI_API_KEY"));
 
-        if (runtime is not null)
-        {
-            ApplyModelSettings(runtime.CurrentSettings.Models);
-        }
-    }
+        GeminiModelInput.Text = Environment.GetEnvironmentVariable("GEMINI_MODEL")?.Trim() is { Length: > 0 } model
+            ? model
+            : "gemini-2.5-flash";
+        DataHubEndpointInput.Text = Environment.GetEnvironmentVariable("DATAHUB_GRAPHQL_URL")?.Trim() is { Length: > 0 } endpoint
+            ? endpoint
+            : "http://localhost:8080/api/graphql";
 
-    private async void OnQualityProfileChanged(object sender, SelectionChangedEventArgs args)
-    {
-        if (_loadingModels || App.CurrentRuntime is not { } runtime ||
-            QualityProfileComboBox.SelectedItem is not ComboBoxItem selected)
-        {
-            return;
-        }
-
-        QualityProfile profile = (selected.Tag as string) switch
-        {
-            "Economy" => QualityProfile.Economy,
-            "Best" => QualityProfile.BestQuality,
-            _ => QualityProfile.Balanced,
-        };
-        ModelIdentifier responsesModel = ModelCatalog.ForProfile(profile).Id;
-        await SaveModelsAsync(runtime, profile, responsesModel);
-    }
-
-    private async void OnAdvancedModelChanged(object sender, SelectionChangedEventArgs args)
-    {
-        if (_loadingModels || App.CurrentRuntime is not { } runtime ||
-            ResponsesModelComboBox.SelectedItem is not ComboBoxItem responses ||
-            RealtimeModelComboBox.SelectedItem is not ComboBoxItem realtime ||
-            TranscriptionModelComboBox.SelectedItem is not ComboBoxItem transcription)
-        {
-            return;
-        }
-
-        await SaveModelsAsync(
-            runtime,
-            QualityProfileComboBox.SelectedItem is ComboBoxItem profileItem
-                ? (profileItem.Tag as string) switch
-                {
-                    "Economy" => QualityProfile.Economy,
-                    "Best" => QualityProfile.BestQuality,
-                    _ => QualityProfile.Balanced,
-                }
-                : QualityProfile.Balanced,
-            new ModelIdentifier((string)responses.Tag),
-            new ModelIdentifier((string)realtime.Tag),
-            new ModelIdentifier((string)transcription.Tag));
-    }
-
-    private async Task SaveModelsAsync(
-        AppRuntime runtime,
-        QualityProfile profile,
-        ModelIdentifier responsesModel,
-        ModelIdentifier? realtimeModel = null,
-        ModelIdentifier? transcriptionModel = null)
-    {
-        try
-        {
-            ApplicationSettings saved = await runtime.UpdateApplicationSettingsAsync(settings => settings with
-            {
-                Models = settings.Models with
-                {
-                    QualityProfile = profile,
-                    ResponsesModel = responsesModel,
-                    RealtimeModel = realtimeModel ?? settings.Models.RealtimeModel,
-                    TranscriptionModel = transcriptionModel ?? settings.Models.TranscriptionModel,
-                },
-            });
-            ApplyModelSettings(saved.Models);
-            ShowConnection(
-                "Model preferences saved",
-                "The selected models will be used after Cursivis restarts.",
-                InfoBarSeverity.Success);
-        }
-        catch (Exception exception) when (
-            exception is IOException or UnauthorizedAccessException or InvalidOperationException or ArgumentException)
-        {
-            ApplyModelSettings(runtime.CurrentSettings.Models);
-            ShowConnection(
-                "Model preferences were not saved",
-                "Cursivis kept the previous model configuration.",
-                InfoBarSeverity.Error);
-        }
-    }
-
-    private void ApplyModelSettings(ModelSelectionSettings models)
-    {
-        _loadingModels = true;
-        try
-        {
-            SelectByTag(QualityProfileComboBox, models.QualityProfile switch
-            {
-                QualityProfile.Economy => "Economy",
-                QualityProfile.BestQuality => "Best",
-                _ => "Balanced",
-            });
-            SelectByTag(ResponsesModelComboBox, models.ResponsesModel.Value);
-            SelectByTag(RealtimeModelComboBox, models.RealtimeModel.Value);
-            SelectByTag(TranscriptionModelComboBox, models.TranscriptionModel.Value);
-        }
-        finally
-        {
-            _loadingModels = false;
-        }
-    }
-
-    private static void SelectByTag(ComboBox comboBox, string tag)
-    {
-        foreach (object item in comboBox.Items)
-        {
-            if (item is ComboBoxItem option && string.Equals(option.Tag as string, tag, StringComparison.Ordinal))
-            {
-                comboBox.SelectedItem = option;
-                return;
-            }
-        }
+        ShowConnection(
+            "Gemini + DataHub",
+            GeminiKeyInput.HasSavedKey
+                ? "Gemini is configured. Test Gemini and DataHub before running the grounded SQL workflow."
+                : "Save a Gemini API key, then test Gemini and DataHub before running the grounded SQL workflow.",
+            InfoBarSeverity.Informational);
     }
 
     private async void OnSaveRequested(object? sender, EventArgs args)
     {
-        AppRuntime? runtime = App.CurrentRuntime;
-        if (runtime is null)
-        {
-            ShowStorageFailure();
-            return;
-        }
-
-        string replacement = OpenAiKeyInput.TakeReplacementKey();
+        string replacement = GeminiKeyInput.TakeReplacementKey();
         char[] characters = replacement.ToCharArray();
         replacement = string.Empty;
         try
         {
+            if (characters.Length == 0)
+            {
+                ShowConnection("Gemini key not saved", "Enter a Gemini API key first.", InfoBarSeverity.Error);
+                return;
+            }
+
             using var secret = new SecretBuffer(characters);
-            await runtime.CredentialManager.SaveAsync(secret);
-            OpenAiKeyInput.HasSavedKey = true;
-            OpenAiHeader.StatusText = ResourceText.Get("OpenAiSavedStatus");
-            OpenAiHeader.StatusDetail = ResourceText.Get("OpenAiSavedStatusDetail");
+            await _geminiCredentials.SaveAsync(secret);
+            GeminiKeyInput.HasSavedKey = true;
             ShowConnection(
-                ResourceText.Get("OpenAiKeySavedTitle"),
-                ResourceText.Get("OpenAiKeySavedMessage"),
+                "Gemini key saved",
+                "The key is protected for the current Windows user and is available to the Cursivis DataOps provider.",
                 InfoBarSeverity.Success);
         }
         catch (SecretStoreException)
@@ -186,23 +77,14 @@ public sealed partial class OpenAiPage : Page
 
     private async void OnDeleteRequested(object? sender, EventArgs args)
     {
-        AppRuntime? runtime = App.CurrentRuntime;
-        if (runtime is null)
-        {
-            ShowStorageFailure();
-            return;
-        }
-
         try
         {
-            _ = await runtime.CredentialManager.DeleteAsync();
-            OpenAiKeyInput.HasSavedKey = false;
-            OpenAiKeyInput.ClearReplacementKey();
-            OpenAiHeader.StatusText = ResourceText.Get("OpenAiNotConfiguredStatus");
-            OpenAiHeader.StatusDetail = ResourceText.Get("OpenAiNotConfiguredStatusDetail");
+            _ = await _geminiCredentials.DeleteAsync();
+            GeminiKeyInput.HasSavedKey = false;
+            GeminiKeyInput.ClearReplacementKey();
             ShowConnection(
-                ResourceText.Get("OpenAiKeyDeletedTitle"),
-                ResourceText.Get("OpenAiKeyDeletedMessage"),
+                "Gemini key removed",
+                "The securely saved Gemini credential was removed for this Windows user.",
                 InfoBarSeverity.Informational);
         }
         catch (SecretStoreException)
@@ -213,39 +95,135 @@ public sealed partial class OpenAiPage : Page
 
     private async void OnTestRequested(object? sender, EventArgs args)
     {
-        AppRuntime? runtime = App.CurrentRuntime;
-        if (runtime is null)
+        if (App.CurrentRuntime is not { } runtime)
         {
-            ShowStorageFailure();
+            ShowConnection("Gemini test unavailable", "Cursivis is still initializing.", InfoBarSeverity.Error);
             return;
         }
 
-        ShowConnection(
-            ResourceText.Get("OpenAiTestingTitle"),
-            ResourceText.Get("OpenAiTestingMessage"),
-            InfoBarSeverity.Informational);
-        ModelAvailabilityResult availability = await runtime.ResponsesGateway
-            .CheckModelAvailabilityAsync(ModelCatalog.Balanced.Value);
+        _ = await WindowsGeminiCredentialStore.LoadIntoProcessEnvironmentAsync();
+        ApplyConnectionSettings(showSuccess: false);
+        string model = Environment.GetEnvironmentVariable("GEMINI_MODEL") ?? "gemini-2.5-flash";
+
+        ShowConnection("Testing Gemini", $"Checking {model} with the configured Gemini credential...", InfoBarSeverity.Informational);
+        ModelAvailabilityResult availability = await runtime.ResponsesGateway.CheckModelAvailabilityAsync(model);
         if (availability.Available)
         {
-            OpenAiHeader.StatusText = ResourceText.Get("OpenAiConnectedStatus");
-            OpenAiHeader.StatusDetail = ResourceText.Get("OpenAiConnectedStatusDetail");
             ShowConnection(
-                ResourceText.Get("OpenAiConnectedTitle"),
-                ResourceText.Get("OpenAiConnectedMessage"),
+                "Gemini connected",
+                $"{model} accepted a structured-output request. The reasoning provider is ready.",
                 InfoBarSeverity.Success);
             return;
         }
 
         ShowConnection(
-            ResourceText.Get("OpenAiTestFailedTitle"),
+            "Gemini test failed",
             GetFailureMessage(availability.Failure?.Kind),
             InfoBarSeverity.Error);
     }
 
+    private void OnSaveConnectionSettingsClicked(object sender, RoutedEventArgs args) =>
+        ApplyConnectionSettings(showSuccess: true);
+
+    private void ApplyConnectionSettings(bool showSuccess)
+    {
+        string model = GeminiModelInput.Text.Trim();
+        string endpoint = DataHubEndpointInput.Text.Trim();
+        if (string.IsNullOrWhiteSpace(model))
+        {
+            ShowConnection("Model is required", "Enter a Gemini model ID.", InfoBarSeverity.Error);
+            return;
+        }
+
+        if (!Uri.TryCreate(endpoint, UriKind.Absolute, out Uri? endpointUri) ||
+            endpointUri.Scheme is not ("http" or "https"))
+        {
+            ShowConnection(
+                "DataHub endpoint is invalid",
+                "Enter an absolute http:// or https:// GraphQL endpoint.",
+                InfoBarSeverity.Error);
+            return;
+        }
+
+        Environment.SetEnvironmentVariable("GEMINI_MODEL", model, EnvironmentVariableTarget.Process);
+        Environment.SetEnvironmentVariable("DATAHUB_GRAPHQL_URL", endpointUri.ToString(), EnvironmentVariableTarget.Process);
+        if (showSuccess)
+        {
+            ShowConnection(
+                "Connection settings applied",
+                "Gemini model and DataHub endpoint are active for this Cursivis session. Environment variables supplied at launch remain the reproducible setup path.",
+                InfoBarSeverity.Success);
+        }
+    }
+
+    private async void OnTestDataHubClicked(object sender, RoutedEventArgs args)
+    {
+        ApplyConnectionSettings(showSuccess: false);
+        string? endpoint = Environment.GetEnvironmentVariable("DATAHUB_GRAPHQL_URL");
+        if (string.IsNullOrWhiteSpace(endpoint))
+        {
+            ShowConnection("DataHub test failed", "Configure the DataHub GraphQL endpoint first.", InfoBarSeverity.Error);
+            return;
+        }
+
+        ShowConnection("Testing DataHub", $"Checking {endpoint}...", InfoBarSeverity.Informational);
+        try
+        {
+            using var request = new HttpRequestMessage(HttpMethod.Post, endpoint);
+            string? token = Environment.GetEnvironmentVariable("DATAHUB_TOKEN")?.Trim();
+            if (!string.IsNullOrWhiteSpace(token))
+            {
+                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            }
+
+            request.Content = new StringContent(
+                JsonSerializer.Serialize(new { query = "query CursivisDataHubHealth { __typename }" }),
+                Encoding.UTF8,
+                "application/json");
+            using HttpResponseMessage response = await Http.SendAsync(request);
+            string body = await response.Content.ReadAsStringAsync();
+            if (!response.IsSuccessStatusCode)
+            {
+                ShowConnection(
+                    "DataHub test failed",
+                    $"DataHub returned HTTP {(int)response.StatusCode}. Check the endpoint and token.",
+                    InfoBarSeverity.Error);
+                return;
+            }
+
+            using JsonDocument document = JsonDocument.Parse(body);
+            if (document.RootElement.TryGetProperty("errors", out JsonElement errors) &&
+                errors.ValueKind == JsonValueKind.Array && errors.GetArrayLength() > 0)
+            {
+                ShowConnection(
+                    "DataHub test failed",
+                    "DataHub responded, but GraphQL rejected the health query. Check endpoint permissions.",
+                    InfoBarSeverity.Error);
+                return;
+            }
+
+            ShowConnection(
+                "DataHub connected",
+                "The GraphQL endpoint is reachable. Seed and verify the demo catalog before recording the grounded workflow.",
+                InfoBarSeverity.Success);
+        }
+        catch (OperationCanceledException)
+        {
+            ShowConnection("DataHub test timed out", "DataHub did not respond within the connection timeout.", InfoBarSeverity.Error);
+        }
+        catch (HttpRequestException)
+        {
+            ShowConnection("DataHub test failed", "Cursivis could not reach the configured DataHub endpoint.", InfoBarSeverity.Error);
+        }
+        catch (JsonException)
+        {
+            ShowConnection("DataHub test failed", "DataHub returned an unexpected response.", InfoBarSeverity.Error);
+        }
+    }
+
     private void ShowStorageFailure() => ShowConnection(
-        ResourceText.Get("OpenAiStorageFailureTitle"),
-        ResourceText.Get("OpenAiStorageFailureMessage"),
+        "Secure storage unavailable",
+        "Cursivis could not update the protected Gemini credential for this Windows user.",
         InfoBarSeverity.Error);
 
     private void ShowConnection(string title, string message, InfoBarSeverity severity)
@@ -258,13 +236,14 @@ public sealed partial class OpenAiPage : Page
 
     private static string GetFailureMessage(OpenAiFailureKind? kind) => kind switch
     {
-        OpenAiFailureKind.Authentication => ResourceText.Get("OpenAiAuthenticationFailureMessage"),
-        OpenAiFailureKind.Permission => ResourceText.Get("OpenAiPermissionFailureMessage"),
-        OpenAiFailureKind.ModelUnavailable => ResourceText.Get("OpenAiModelFailureMessage"),
-        OpenAiFailureKind.Quota => ResourceText.Get("OpenAiQuotaFailureMessage"),
-        OpenAiFailureKind.RateLimit => ResourceText.Get("OpenAiRateLimitFailureMessage"),
-        OpenAiFailureKind.Network => ResourceText.Get("OpenAiNetworkFailureMessage"),
-        OpenAiFailureKind.Timeout => ResourceText.Get("OpenAiTimeoutFailureMessage"),
-        _ => ResourceText.Get("OpenAiUnknownFailureMessage"),
+        OpenAiFailureKind.Authentication => "Gemini rejected the API key. Check the configured credential.",
+        OpenAiFailureKind.Permission => "Gemini accepted the key but denied access to the configured model.",
+        OpenAiFailureKind.ModelUnavailable => "The configured Gemini model is unavailable. Verify GEMINI_MODEL.",
+        OpenAiFailureKind.Quota => "The Gemini project has no available quota for this request.",
+        OpenAiFailureKind.RateLimit => "Gemini is temporarily rate limited. Try again after the provider cooldown.",
+        OpenAiFailureKind.Network => "Cursivis could not reach Gemini.",
+        OpenAiFailureKind.Timeout => "Gemini did not respond before the request timeout.",
+        OpenAiFailureKind.MalformedResponse => "Gemini returned an invalid structured response.",
+        _ => "Gemini could not be verified. Check the key, model, and network connection.",
     };
 }
