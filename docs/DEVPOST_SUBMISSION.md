@@ -1,25 +1,26 @@
 # Devpost submission draft
 
-**Title:** Cursivis DataOps
-**Tagline:** Selected SQL becomes DataHub-grounded, Gemini-reasoned data action.
+**Title:** Cursivis DataOps  
+**Tagline:** Selected SQL becomes DataHub-grounded, Gemini-reasoned action.
 
 ## Short description
 
-Cursivis DataOps is a Windows context-native agent for data teams. Select broken SQL, a schema question, or a pipeline error; Cursivis resolves the real DataHub asset, asks Gemini to reason over its schema, ownership, and lineage, and returns an actionable, safe result.
+Cursivis DataOps is a context-native Windows agent for data teams. Select broken SQL or a data problem; Cursivis reads the live organizational context through the official DataHub MCP Server, asks Gemini to reason over verified schema, ownership, descriptions, and lineage, and returns a safe result that can be acted on in place. Reviewed resolutions can be explicitly saved back to DataHub through MCP and verified by read-after-write.
 
 ## Detailed description
 
-Data engineers work in editors, terminals, and browser consoles—not in a generic chat tab. Cursivis starts from their selected context. When that context references data, its Gemini provider first queries DataHub GraphQL for the authoritative dataset and metadata. The model receives the selected text plus real catalog evidence; it is not allowed to claim grounding if DataHub cannot resolve the asset.
+Data engineers work in editors, terminals, and browser consoles—not in a generic chat tab. Cursivis starts from the user's selected context. When selected SQL references data, the runtime extracts the dataset name and calls the official **DataHub MCP Server** tools `search`, `get_entities`, `list_schema_fields`, and `get_lineage`. Gemini receives a bounded package of that live DataHub evidence and is instructed not to invent fields, owners, or lineage relationships. If DataHub cannot resolve the asset confidently, the workflow fails closed rather than presenting generic model output as grounded truth.
 
-The result explains the correction and impact, then reuses Cursivis’ existing Copy, Insert, Replace, and safe-action interactions. A reviewed resolution can be written back explicitly as a DataHub context document with the official DataHub MCP `save_document` mutation, creating durable organizational knowledge for the next agent.
+The result reuses Cursivis' safe Copy, Insert, and Replace interactions. For durable organizational learning, **Save to DataHub** is a two-step confirmed action: the first click arms the mutation, the second explicitly approves it, Cursivis invokes MCP `save_document` linked to the grounded asset, and then uses MCP `get_entities` to read the new document back before reporting success.
 
-**Recommended challenge:** Agents That Do Real Work + Metadata-Aware Code Generation & Development
+The deterministic local catalog is seeded with DataHub OSS/Core and includes a deliberately broken query against `analytics.customers`, its governed schema (`customer_id`, `lifetime_value_usd`, `customer_tier`, `updated_at`), ownership, one upstream source, and two downstream consumers. Setup verifies the metadata is real and searchable rather than substituting example JSON for runtime context.
 
-**Technologies:** WinUI 3/.NET 8, Gemini Developer API structured output, DataHub GraphQL API, DataHub MCP write-back, Docker/DataHub OSS.
+**Challenge:** Agents That Do Real Work  
+**DataHub technologies:** DataHub OSS / Core Platform + DataHub MCP Server  
+**Built with:** C#/.NET 8, WinUI 3, Gemini Developer API structured output, DataHub MCP Server, DataHub OSS/Core, DataHub Python SDK, Docker, PowerShell  
+**Why DataHub:** schema, lineage, ownership, descriptions, and durable documents are the organizational evidence and memory that turn generic AI advice into a trustworthy data action.  
+**Originality:** selection becomes immediate intent; DataHub becomes the agent's organizational truth; Gemini reasons over that truth; Cursivis safely turns the result into action and reviewed memory.
 
-**Why DataHub:** schema, lineage, ownership and catalog knowledge are the evidence that makes the SQL advice trustworthy.
-
-**Originality:** context-native desktop action paired with a fail-closed catalog grounding boundary and reviewed organizational learning.
-
-**GitHub:** `https://github.com/UnknownGod2011/cursivis-dataops`
-**Demo video:** _add public YouTube/Vimeo URL_
+**GitHub:** `https://github.com/UnknownGod2011/cursivis-dataops`  
+**Artifacts:** `https://github.com/UnknownGod2011/cursivis-dataops/tree/main/examples`  
+**Demo video:** add the submitted public video URL
