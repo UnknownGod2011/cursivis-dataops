@@ -48,6 +48,11 @@ try {
 & (Join-Path $PSScriptRoot 'seed-demo-data.ps1')
 if ($LASTEXITCODE -ne 0) { throw 'DataHub demo metadata verification failed.' }
 
+# Fail before launching the UI if the actual official MCP process cannot initialize,
+# expose the required read/write tools, or read the seeded schema and lineage.
+& (Join-Path $PSScriptRoot 'verify-live-mcp.ps1')
+if ($LASTEXITCODE -ne 0) { throw 'Live DataHub MCP preflight failed.' }
+
 dotnet build (Join-Path $root 'Cursivis.sln') -c Release -p:Platform=x64
 if ($LASTEXITCODE -ne 0) { throw 'Release build failed.' }
 
