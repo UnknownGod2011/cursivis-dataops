@@ -63,6 +63,12 @@ internal sealed class DataHubMcpClient : IAsyncDisposable
             startInfo.Environment.Remove("DATAHUB_GMS_TOKEN");
         }
         startInfo.Environment["TOOLS_IS_MUTATION_ENABLED"] = enableMutations ? "true" : "false";
+        // save_document is controlled by the document-tool gate independently
+        // from the broader mutation-tool switch in the official DataHub MCP
+        // server. Enable only the document surface when Cursivis enters the
+        // explicit confirmation-gated write-back path; keep it disabled for
+        // read-only grounding sessions.
+        startInfo.Environment["DATAHUB_MCP_DOCUMENT_TOOLS_DISABLED"] = enableMutations ? "false" : "true";
         startInfo.Environment["SAVE_DOCUMENT_TOOL_ENABLED"] = enableMutations ? "true" : "false";
         startInfo.Environment["PYTHONUNBUFFERED"] = "1";
 
