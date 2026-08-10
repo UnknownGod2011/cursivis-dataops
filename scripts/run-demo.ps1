@@ -19,7 +19,20 @@ if ([string]::IsNullOrWhiteSpace($env:DATAHUB_GMS_URL)) {
     $env:DATAHUB_GMS_URL = 'http://localhost:8080'
 }
 if ([string]::IsNullOrWhiteSpace($env:DATAHUB_GRAPHQL_URL)) {
+    # Retained for deterministic seed/verification helpers. The judge-facing
+    # Cursivis grounding path reads DataHub through MCP, not direct GraphQL.
     $env:DATAHUB_GRAPHQL_URL = "$($env:DATAHUB_GMS_URL.TrimEnd('/'))/api/graphql"
+}
+
+if ([string]::IsNullOrWhiteSpace($env:DATAHUB_MCP_COMMAND)) {
+    $uvx = Join-Path $root '.tools\datahub-venv\Scripts\uvx.exe'
+    if (-not (Test-Path $uvx)) {
+        throw 'Official DataHub MCP launcher is missing. Run .\scripts\bootstrap-datahub.ps1 first.'
+    }
+    $env:DATAHUB_MCP_COMMAND = $uvx
+}
+if ([string]::IsNullOrWhiteSpace($env:DATAHUB_MCP_PACKAGE)) {
+    $env:DATAHUB_MCP_PACKAGE = 'mcp-server-datahub@latest'
 }
 
 try {
@@ -39,5 +52,6 @@ $app = Join-Path $root 'apps\windows\Cursivis.Windows.App\bin\x64\Release\net8.0
 if (-not (Test-Path $app)) { throw "Expected application executable was not produced: $app" }
 
 Start-Process -FilePath $app
-Write-Host 'Cursivis DataOps launched with a verified local DataHub catalog.' -ForegroundColor Green
+Write-Host 'Cursivis DataOps launched with a verified local DataHub catalog and official MCP runtime.' -ForegroundColor Green
 Write-Host 'Golden demo: select examples\broken-query.sql and invoke the configured context hotkey.'
+Write-Host 'Grounding uses DataHub MCP search/get_entities/list_schema_fields/get_lineage; confirmed Save to DataHub uses MCP save_document + read-after-write.'
