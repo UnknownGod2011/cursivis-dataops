@@ -12,12 +12,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <!-- The legacy GraphQL-first gateway remains in history for review, but the
-         hackathon runtime compiles the MCP-first implementation instead. -->
-    <Compile Remove="DataHubGeminiResponsesGateway.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\Cursivis.Application\Cursivis.Application.csproj" />
     <ProjectReference Include="..\Cursivis.Contracts\Cursivis.Contracts.csproj" />
   </ItemGroup>
