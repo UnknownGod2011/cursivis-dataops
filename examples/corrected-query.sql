@@ -1,3 +1,3 @@
 SELECT customer_id, lifetime_value_usd
-FROM analytics.customer_360
+FROM analytics.customers
 WHERE customer_tier = 'enterprise';
