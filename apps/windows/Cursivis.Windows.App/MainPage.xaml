@@ -26,7 +26,7 @@
                     IsSelected="True"
                     Tag="Overview" />
                 <NavigationViewItem
-                    x:Uid="OpenAiNavigationItem"
+                    Content="AI &amp; DataHub"
                     AutomationProperties.AutomationId="NavigateOpenAI"
                     Icon="Globe"
                     Tag="OpenAI" />
