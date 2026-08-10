@@ -149,6 +149,14 @@ public static class WindowsGeminiCredentialStore
                 settings.DataHubGraphQlUrl,
                 EnvironmentVariableTarget.Process);
         }
+
+        if (string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("DATAHUB_GMS_URL")))
+        {
+            Environment.SetEnvironmentVariable(
+                "DATAHUB_GMS_URL",
+                settings.DataHubGmsUrl,
+                EnvironmentVariableTarget.Process);
+        }
     }
 }
 
@@ -159,6 +167,8 @@ public sealed record DataOpsConnectionSettings(string GeminiModel, string DataHu
 
     public static DataOpsConnectionSettings Default { get; } =
         new(DefaultGeminiModel, DefaultDataHubGraphQlUrl);
+
+    public string DataHubGmsUrl => DeriveGmsUrl(DataHubGraphQlUrl);
 
     public DataOpsConnectionSettings Normalize()
     {
@@ -175,6 +185,19 @@ public sealed record DataOpsConnectionSettings(string GeminiModel, string DataHu
         }
 
         return new DataOpsConnectionSettings(model, endpoint);
+    }
+
+    public static string DeriveGmsUrl(string graphQlUrl)
+    {
+        string endpoint = string.IsNullOrWhiteSpace(graphQlUrl)
+            ? DefaultDataHubGraphQlUrl
+            : graphQlUrl.Trim();
+        const string suffix = "/api/graphql";
+        if (endpoint.EndsWith(suffix, StringComparison.OrdinalIgnoreCase))
+        {
+            endpoint = endpoint[..^suffix.Length];
+        }
+        return endpoint.TrimEnd('/');
     }
 }
 
