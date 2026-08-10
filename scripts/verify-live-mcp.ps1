@@ -30,8 +30,13 @@ $psi.Environment['DATAHUB_GMS_URL'] = $env:DATAHUB_GMS_URL.TrimEnd('/')
 if (-not [string]::IsNullOrWhiteSpace($env:DATAHUB_TOKEN)) {
     $psi.Environment['DATAHUB_GMS_TOKEN'] = $env:DATAHUB_TOKEN.Trim()
 }
+# save_document is a document tool with its own feature flag in the official
+# DataHub MCP server. Keep unrelated metadata mutation tools disabled while
+# enabling exactly the document write capability exercised by the confirmed
+# Cursivis write-back flow.
 $psi.Environment['TOOLS_IS_MUTATION_ENABLED'] = 'false'
-$psi.Environment['SAVE_DOCUMENT_TOOL_ENABLED'] = 'false'
+$psi.Environment['DATAHUB_MCP_DOCUMENT_TOOLS_DISABLED'] = 'false'
+$psi.Environment['SAVE_DOCUMENT_TOOL_ENABLED'] = 'true'
 $psi.Environment['PYTHONUNBUFFERED'] = '1'
 
 $process = [System.Diagnostics.Process]::Start($psi)
