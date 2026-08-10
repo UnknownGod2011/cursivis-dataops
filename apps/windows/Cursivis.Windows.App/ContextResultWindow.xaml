@@ -223,7 +223,7 @@
                                     AutomationProperties.Name="Save reviewed resolution to DataHub"
                                     Click="OnSaveToDataHubClicked"
                                     Content="Save to DataHub"
-                                    IsEnabled="False"
+                                    IsEnabled="True"
                                     Style="{StaticResource PanelFooterButtonStyle}" />
                                 <Button
                                     x:Name="RefineButton"
