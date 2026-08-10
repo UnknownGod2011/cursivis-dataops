@@ -43,7 +43,7 @@ public sealed partial class ContextResultWindow
         }
 
         // The first click only arms the mutation. A second click on the same
-        // reviewed result is required before any DataHub write is attempted.
+        // reviewed result is required before any DataHub MCP write is attempted.
         if (!_dataHubSaveArmed ||
             !string.Equals(_dataHubSaveArmedContent, reviewedContent, StringComparison.Ordinal))
         {
@@ -51,8 +51,8 @@ public sealed partial class ContextResultWindow
             _dataHubSaveArmedContent = reviewedContent;
             SaveToDataHubButton.Content = "Confirm Save";
             ShowNotice(
-                "Confirm DataHub write",
-                "Click Confirm Save to store this reviewed result as a hidden context document linked to the grounded dataset.",
+                "Confirm DataHub MCP write",
+                "Click Confirm Save to publish this reviewed resolution as a DataHub knowledge document linked to the grounded dataset. No write occurs before confirmation.",
                 InfoBarSeverity.Informational);
             return;
         }
@@ -69,7 +69,7 @@ public sealed partial class ContextResultWindow
             {
                 SaveToDataHubButton.Content = "Saved";
                 ShowNotice(
-                    "Saved to DataHub",
+                    "Saved and verified through DataHub MCP",
                     result.Message,
                     InfoBarSeverity.Success);
                 return;
@@ -77,7 +77,7 @@ public sealed partial class ContextResultWindow
 
             ResetDataHubSaveButton();
             ShowNotice(
-                "DataHub save failed",
+                "DataHub MCP save failed",
                 result.Message,
                 InfoBarSeverity.Error);
         }
@@ -94,7 +94,7 @@ public sealed partial class ContextResultWindow
             ResetDataHubSaveButton();
             ShowNotice(
                 "DataHub save failed safely",
-                "Cursivis could not verify the DataHub write. No success is being claimed.",
+                "Cursivis could not verify the DataHub MCP write. No success is being claimed.",
                 InfoBarSeverity.Error);
         }
     }
