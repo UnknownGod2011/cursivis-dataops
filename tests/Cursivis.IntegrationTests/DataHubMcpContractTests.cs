@@ -34,6 +34,12 @@ public sealed class DataHubMcpContractTests
     }
 
     [Fact]
+    public void McpRuntimeDefaultsToPinnedOfficialRelease()
+    {
+        Assert.Equal("mcp-server-datahub@0.6.0", DataHubMcpClient.DefaultPackage);
+    }
+
+    [Fact]
     public void McpToolResultPrefersStructuredContent()
     {
         using JsonDocument document = JsonDocument.Parse("""
