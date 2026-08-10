@@ -12,6 +12,7 @@ namespace Cursivis.Infrastructure.OpenAI;
 internal sealed class DataHubMcpClient : IAsyncDisposable
 {
     private const string ProtocolVersion = "2025-06-18";
+    internal const string DefaultPackage = "mcp-server-datahub@0.6.0";
     private readonly Process _process;
     private readonly StreamWriter _stdin;
     private readonly StreamReader _stdout;
@@ -38,7 +39,7 @@ internal sealed class DataHubMcpClient : IAsyncDisposable
         ArgumentException.ThrowIfNullOrWhiteSpace(gmsUrl);
 
         string executable = Environment.GetEnvironmentVariable("DATAHUB_MCP_COMMAND")?.Trim() ?? "uvx";
-        string package = Environment.GetEnvironmentVariable("DATAHUB_MCP_PACKAGE")?.Trim() ?? "mcp-server-datahub@latest";
+        string package = Environment.GetEnvironmentVariable("DATAHUB_MCP_PACKAGE")?.Trim() ?? DefaultPackage;
         var startInfo = new ProcessStartInfo
         {
             FileName = executable,
