@@ -38,10 +38,10 @@ public sealed partial class OpenAiPage : Page
             : saved.DataHubGraphQlUrl;
 
         ShowConnection(
-            "Gemini + DataHub",
+            "Gemini + DataHub MCP",
             GeminiKeyInput.HasSavedKey
-                ? "Gemini is configured. Test Gemini and DataHub before running the grounded SQL workflow."
-                : "Save a Gemini API key, then test Gemini and DataHub before running the grounded SQL workflow.",
+                ? "Gemini is configured. Test Gemini and DataHub before running the MCP-grounded SQL workflow."
+                : "Save a Gemini API key, then test Gemini and DataHub before running the MCP-grounded SQL workflow.",
             InfoBarSeverity.Informational);
     }
 
@@ -139,13 +139,12 @@ public sealed partial class OpenAiPage : Page
         try
         {
             await WindowsGeminiCredentialStore.SaveConnectionSettingsAsync(settings);
-            // Explicitly update this process even when values were already loaded
-            // from an older saved configuration at startup.
             Environment.SetEnvironmentVariable("GEMINI_MODEL", settings.GeminiModel, EnvironmentVariableTarget.Process);
             Environment.SetEnvironmentVariable("DATAHUB_GRAPHQL_URL", settings.DataHubGraphQlUrl, EnvironmentVariableTarget.Process);
+            Environment.SetEnvironmentVariable("DATAHUB_GMS_URL", settings.DataHubGmsUrl, EnvironmentVariableTarget.Process);
             ShowConnection(
                 "Connection settings saved",
-                "Gemini model and DataHub endpoint are stored for this Windows user. Launch-time environment variables can still override them for reproducible development setups.",
+                $"Gemini model and DataHub endpoint are stored for this Windows user. The DataHub MCP Server will target {settings.DataHubGmsUrl}.",
                 InfoBarSeverity.Success);
         }
         catch (IOException)
@@ -183,6 +182,7 @@ public sealed partial class OpenAiPage : Page
         settings = new DataOpsConnectionSettings(model, endpointUri.ToString()).Normalize();
         Environment.SetEnvironmentVariable("GEMINI_MODEL", settings.GeminiModel, EnvironmentVariableTarget.Process);
         Environment.SetEnvironmentVariable("DATAHUB_GRAPHQL_URL", settings.DataHubGraphQlUrl, EnvironmentVariableTarget.Process);
+        Environment.SetEnvironmentVariable("DATAHUB_GMS_URL", settings.DataHubGmsUrl, EnvironmentVariableTarget.Process);
         return true;
     }
 
@@ -231,7 +231,7 @@ public sealed partial class OpenAiPage : Page
 
             ShowConnection(
                 "DataHub connected",
-                "The GraphQL endpoint is reachable. Seed and verify the demo catalog before recording the grounded workflow.",
+                $"The catalog endpoint is reachable. The official MCP runtime will target {settings.DataHubGmsUrl}; seed and verify the demo catalog before recording.",
                 InfoBarSeverity.Success);
         }
         catch (OperationCanceledException)
