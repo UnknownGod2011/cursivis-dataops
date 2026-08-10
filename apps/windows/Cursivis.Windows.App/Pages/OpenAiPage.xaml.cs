@@ -29,12 +29,13 @@ public sealed partial class OpenAiPage : Page
         GeminiKeyInput.HasSavedKey = _geminiCredentials.HasSavedKey ||
             !string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("GEMINI_API_KEY"));
 
+        DataOpsConnectionSettings saved = WindowsGeminiCredentialStore.LoadConnectionSettings();
         GeminiModelInput.Text = Environment.GetEnvironmentVariable("GEMINI_MODEL")?.Trim() is { Length: > 0 } model
             ? model
-            : "gemini-2.5-flash";
+            : saved.GeminiModel;
         DataHubEndpointInput.Text = Environment.GetEnvironmentVariable("DATAHUB_GRAPHQL_URL")?.Trim() is { Length: > 0 } endpoint
             ? endpoint
-            : "http://localhost:8080/api/graphql";
+            : saved.DataHubGraphQlUrl;
 
         ShowConnection(
             "Gemini + DataHub",
@@ -102,16 +103,22 @@ public sealed partial class OpenAiPage : Page
         }
 
         _ = await WindowsGeminiCredentialStore.LoadIntoProcessEnvironmentAsync();
-        ApplyConnectionSettings(showSuccess: false);
-        string model = Environment.GetEnvironmentVariable("GEMINI_MODEL") ?? "gemini-2.5-flash";
+        if (!TryApplyConnectionSettings(out DataOpsConnectionSettings settings))
+        {
+            return;
+        }
 
-        ShowConnection("Testing Gemini", $"Checking {model} with the configured Gemini credential...", InfoBarSeverity.Informational);
-        ModelAvailabilityResult availability = await runtime.ResponsesGateway.CheckModelAvailabilityAsync(model);
+        ShowConnection(
+            "Testing Gemini",
+            $"Checking {settings.GeminiModel} with the configured Gemini credential...",
+            InfoBarSeverity.Informational);
+        ModelAvailabilityResult availability = await runtime.ResponsesGateway
+            .CheckModelAvailabilityAsync(settings.GeminiModel);
         if (availability.Available)
         {
             ShowConnection(
                 "Gemini connected",
-                $"{model} accepted a structured-output request. The reasoning provider is ready.",
+                $"{settings.GeminiModel} accepted a structured-output request. The reasoning provider is ready.",
                 InfoBarSeverity.Success);
             return;
         }
@@ -122,54 +129,74 @@ public sealed partial class OpenAiPage : Page
             InfoBarSeverity.Error);
     }
 
-    private void OnSaveConnectionSettingsClicked(object sender, RoutedEventArgs args) =>
-        ApplyConnectionSettings(showSuccess: true);
+    private async void OnSaveConnectionSettingsClicked(object sender, RoutedEventArgs args)
+    {
+        if (!TryApplyConnectionSettings(out DataOpsConnectionSettings settings))
+        {
+            return;
+        }
 
-    private void ApplyConnectionSettings(bool showSuccess)
+        try
+        {
+            await WindowsGeminiCredentialStore.SaveConnectionSettingsAsync(settings);
+            // Explicitly update this process even when values were already loaded
+            // from an older saved configuration at startup.
+            Environment.SetEnvironmentVariable("GEMINI_MODEL", settings.GeminiModel, EnvironmentVariableTarget.Process);
+            Environment.SetEnvironmentVariable("DATAHUB_GRAPHQL_URL", settings.DataHubGraphQlUrl, EnvironmentVariableTarget.Process);
+            ShowConnection(
+                "Connection settings saved",
+                "Gemini model and DataHub endpoint are stored for this Windows user. Launch-time environment variables can still override them for reproducible development setups.",
+                InfoBarSeverity.Success);
+        }
+        catch (IOException)
+        {
+            ShowConnection("Connection settings not saved", "Cursivis could not write the DataOps connection settings file.", InfoBarSeverity.Error);
+        }
+        catch (UnauthorizedAccessException)
+        {
+            ShowConnection("Connection settings not saved", "Windows denied access to the Cursivis settings directory.", InfoBarSeverity.Error);
+        }
+    }
+
+    private bool TryApplyConnectionSettings(out DataOpsConnectionSettings settings)
     {
         string model = GeminiModelInput.Text.Trim();
         string endpoint = DataHubEndpointInput.Text.Trim();
         if (string.IsNullOrWhiteSpace(model))
         {
+            settings = DataOpsConnectionSettings.Default;
             ShowConnection("Model is required", "Enter a Gemini model ID.", InfoBarSeverity.Error);
-            return;
+            return false;
         }
 
         if (!Uri.TryCreate(endpoint, UriKind.Absolute, out Uri? endpointUri) ||
-            endpointUri.Scheme is not ("http" or "https"))
+            (endpointUri.Scheme != Uri.UriSchemeHttp && endpointUri.Scheme != Uri.UriSchemeHttps))
         {
+            settings = DataOpsConnectionSettings.Default;
             ShowConnection(
                 "DataHub endpoint is invalid",
                 "Enter an absolute http:// or https:// GraphQL endpoint.",
                 InfoBarSeverity.Error);
-            return;
+            return false;
         }
 
-        Environment.SetEnvironmentVariable("GEMINI_MODEL", model, EnvironmentVariableTarget.Process);
-        Environment.SetEnvironmentVariable("DATAHUB_GRAPHQL_URL", endpointUri.ToString(), EnvironmentVariableTarget.Process);
-        if (showSuccess)
-        {
-            ShowConnection(
-                "Connection settings applied",
-                "Gemini model and DataHub endpoint are active for this Cursivis session. Environment variables supplied at launch remain the reproducible setup path.",
-                InfoBarSeverity.Success);
-        }
+        settings = new DataOpsConnectionSettings(model, endpointUri.ToString()).Normalize();
+        Environment.SetEnvironmentVariable("GEMINI_MODEL", settings.GeminiModel, EnvironmentVariableTarget.Process);
+        Environment.SetEnvironmentVariable("DATAHUB_GRAPHQL_URL", settings.DataHubGraphQlUrl, EnvironmentVariableTarget.Process);
+        return true;
     }
 
     private async void OnTestDataHubClicked(object sender, RoutedEventArgs args)
     {
-        ApplyConnectionSettings(showSuccess: false);
-        string? endpoint = Environment.GetEnvironmentVariable("DATAHUB_GRAPHQL_URL");
-        if (string.IsNullOrWhiteSpace(endpoint))
+        if (!TryApplyConnectionSettings(out DataOpsConnectionSettings settings))
         {
-            ShowConnection("DataHub test failed", "Configure the DataHub GraphQL endpoint first.", InfoBarSeverity.Error);
             return;
         }
 
-        ShowConnection("Testing DataHub", $"Checking {endpoint}...", InfoBarSeverity.Informational);
+        ShowConnection("Testing DataHub", $"Checking {settings.DataHubGraphQlUrl}...", InfoBarSeverity.Informational);
         try
         {
-            using var request = new HttpRequestMessage(HttpMethod.Post, endpoint);
+            using var request = new HttpRequestMessage(HttpMethod.Post, settings.DataHubGraphQlUrl);
             string? token = Environment.GetEnvironmentVariable("DATAHUB_TOKEN")?.Trim();
             if (!string.IsNullOrWhiteSpace(token))
             {
