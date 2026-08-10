@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Page
+    x:Class="Cursivis.Windows.App.Pages.OverviewPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls="using:Cursivis.Windows.App.Controls">
+
+    <Grid x:Name="PageRoot" Padding="{StaticResource PagePadding}">
+        <VisualStateManager.VisualStateGroups>
+            <VisualStateGroup>
+                <VisualState>
+                    <VisualState.StateTriggers>
+                        <AdaptiveTrigger MinWindowWidth="0" />
+                    </VisualState.StateTriggers>
+                    <VisualState.Setters>
+                        <Setter Target="PageRoot.Padding" Value="{StaticResource PagePaddingNarrow}" />
+                    </VisualState.Setters>
+                </VisualState>
+                <VisualState>
+                    <VisualState.StateTriggers>
+                        <AdaptiveTrigger MinWindowWidth="760" />
+                    </VisualState.StateTriggers>
+                    <VisualState.Setters>
+                        <Setter Target="PageRoot.Padding" Value="{StaticResource PagePadding}" />
+                    </VisualState.Setters>
+                </VisualState>
+            </VisualStateGroup>
+        </VisualStateManager.VisualStateGroups>
+
+        <ScrollViewer
+            HorizontalScrollBarVisibility="Disabled"
+            HorizontalScrollMode="Disabled"
+            VerticalScrollBarVisibility="Auto">
+            <StackPanel
+                MaxWidth="920"
+                HorizontalAlignment="Stretch"
+                Spacing="20">
+                <controls:SettingsSectionHeader x:Name="OverviewHeader" x:Uid="OverviewSectionHeader" />
+
+                <controls:SettingsCard x:Uid="OverviewWelcomeCard" IconGlyph="&#xE77B;">
+                    <controls:SettingsCard.Body>
+                        <StackPanel Spacing="14">
+                            <TextBlock x:Uid="OverviewWelcomeBody" Style="{StaticResource BodySecondaryTextStyle}" />
+                            <Grid ColumnSpacing="10" RowSpacing="10">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+
+                                <TextBlock x:Uid="OverviewStepOpenAi" VerticalAlignment="Center" TextWrapping="Wrap" />
+                                <Button
+                                    x:Uid="OverviewConfigureOpenAiButton"
+                                    Grid.Column="1"
+                                    AutomationProperties.AutomationId="OverviewConfigureOpenAI"
+                                    Click="OnConfigureOpenAiClicked" />
+
+                                <TextBlock x:Uid="OverviewStepHotkeys" Grid.Row="1" VerticalAlignment="Center" TextWrapping="Wrap" />
+                                <Button
+                                    x:Uid="OverviewReviewHotkeysButton"
+                                    Grid.Row="1"
+                                    Grid.Column="1"
+                                    AutomationProperties.AutomationId="OverviewReviewHotkeys"
+                                    Click="OnReviewHotkeysClicked" />
+
+                                <TextBlock x:Uid="OverviewStepBrowser" Grid.Row="2" VerticalAlignment="Center" TextWrapping="Wrap" />
+                                <Button
+                                    x:Uid="OverviewSetUpBrowserButton"
+                                    Grid.Row="2"
+                                    Grid.Column="1"
+                                    AutomationProperties.AutomationId="OverviewSetUpBrowser"
+                                    Click="OnSetUpBrowserClicked" />
+                            </Grid>
+                            <TextBlock x:Uid="OverviewOptionalSteps" Style="{StaticResource CaptionSecondaryTextStyle}" />
+                        </StackPanel>
+                    </controls:SettingsCard.Body>
+                </controls:SettingsCard>
+
+                <controls:SettingsCard x:Uid="OverviewReadinessCard" IconGlyph="&#xE9D9;">
+                    <controls:SettingsCard.Body>
+                        <StackPanel Spacing="10">
+                            <controls:StatusIndicator x:Name="OpenAiStatus" x:Uid="OverviewOpenAiStatus" Glyph="&#xE946;" />
+                            <controls:StatusIndicator x:Uid="OverviewBrowserStatus" Glyph="&#xE711;" />
+                            <controls:StatusIndicator x:Name="HotkeyStatus" x:Uid="OverviewHotkeyStatus" Glyph="&#xE7E6;" />
+                            <controls:StatusIndicator x:Uid="OverviewVoiceStatus" Glyph="&#xE720;" />
+                        </StackPanel>
+                    </controls:SettingsCard.Body>
+                </controls:SettingsCard>
+
+                <controls:SettingsCard x:Uid="OverviewDefaultsCard" IconGlyph="&#xE713;">
+                    <controls:SettingsCard.Body>
+                        <StackPanel Spacing="8">
+                            <TextBlock x:Uid="OverviewQualityDefault" TextWrapping="Wrap" />
+                            <TextBlock x:Uid="OverviewQuickTaskDefault" TextWrapping="Wrap" />
+                            <TextBlock x:Uid="OverviewCaptureDefault" TextWrapping="Wrap" />
+                            <TextBlock x:Name="StartupStatusText" TextWrapping="Wrap" />
+                        </StackPanel>
+                    </controls:SettingsCard.Body>
+                </controls:SettingsCard>
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</Page>

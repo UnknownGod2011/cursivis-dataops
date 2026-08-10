@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Window
+    x:Class="Cursivis.Windows.App.ActionPlanReviewWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <Grid x:Name="OverlayRoot" Background="Transparent">
+        <Grid.KeyboardAccelerators>
+            <KeyboardAccelerator Key="Escape" Invoked="OnEscapeInvoked" />
+            <KeyboardAccelerator Key="Enter" Modifiers="Control" Invoked="OnConfirmAcceleratorInvoked" />
+        </Grid.KeyboardAccelerators>
+
+        <Border
+            Padding="12"
+            Background="{ThemeResource OverlayShellBrush}"
+            BorderBrush="{ThemeResource OverlayBorderBrush}"
+            BorderThickness="1"
+            CornerRadius="24">
+            <Border.Shadow>
+                <ThemeShadow />
+            </Border.Shadow>
+            <Grid RowSpacing="10">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <Grid x:Name="DragHeader" Padding="8,4">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel>
+                        <TextBlock
+                            FontSize="11"
+                            FontWeight="SemiBold"
+                            Foreground="{ThemeResource OverlayMutedTextBrush}"
+                            Text="Cursivis / Take Action" />
+                        <TextBlock
+                            Margin="0,2,0,0"
+                            FontSize="18"
+                            FontWeight="SemiBold"
+                            Foreground="{ThemeResource OverlayTextBrush}"
+                            Text="Review the proposed plan" />
+                    </StackPanel>
+                    <Button
+                        Grid.Column="1"
+                        Width="34"
+                        Height="34"
+                        AutomationProperties.AutomationId="CancelActionPlanHeader"
+                        AutomationProperties.Name="Cancel"
+                        Click="OnCancelClicked"
+                        Style="{StaticResource PanelIconButtonStyle}">
+                        <FontIcon FontSize="12" Glyph="&#xE711;" />
+                    </Button>
+                </Grid>
+
+                <Border
+                    Grid.Row="1"
+                    Padding="12,9"
+                    Background="{ThemeResource OverlayHeaderBrush}"
+                    CornerRadius="14">
+                    <TextBlock
+                        x:Name="GoalText"
+                        FontSize="13.5"
+                        Foreground="{ThemeResource OverlayTextBrush}"
+                        TextWrapping="Wrap" />
+                </Border>
+
+                <ScrollViewer
+                    Grid.Row="2"
+                    MaxHeight="220"
+                    HorizontalScrollBarVisibility="Disabled"
+                    VerticalScrollBarVisibility="Auto">
+                    <ItemsControl x:Name="StepsList">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border
+                                    Margin="0,0,0,6"
+                                    Padding="10,7"
+                                    Background="{ThemeResource OverlayContentBrush}"
+                                    BorderBrush="{ThemeResource OverlayBorderBrush}"
+                                    BorderThickness="1"
+                                    CornerRadius="12">
+                                    <TextBlock
+                                        FontSize="12.5"
+                                        Foreground="{ThemeResource OverlayTextBrush}"
+                                        Text="{Binding}"
+                                        TextWrapping="Wrap" />
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+
+                <StackPanel Grid.Row="3" Spacing="6">
+                    <TextBlock
+                        x:Name="PolicyText"
+                        FontSize="11"
+                        Foreground="{ThemeResource OverlayMutedTextBrush}"
+                        TextWrapping="Wrap" />
+                    <TextBox
+                        x:Name="InstructionsTextBox"
+                        MinHeight="42"
+                        MaxHeight="92"
+                        AcceptsReturn="True"
+                        AutomationProperties.AutomationId="ActionPlanAdditionalInstructions"
+                        Background="{ThemeResource OverlayContentBrush}"
+                        BorderBrush="{ThemeResource OverlayBorderBrush}"
+                        BorderThickness="1"
+                        CornerRadius="12"
+                        Foreground="{ThemeResource OverlayTextBrush}"
+                        MaxLength="2000"
+                        Padding="10,7"
+                        PlaceholderText="Add instructions (optional)"
+                        TextWrapping="Wrap" />
+                </StackPanel>
+
+                <Grid Grid.Row="4">
+                    <TextBlock
+                        VerticalAlignment="Center"
+                        FontSize="10.5"
+                        Foreground="{ThemeResource OverlaySubtleTextBrush}"
+                        Text="Esc cancel · Ctrl+Enter confirm" />
+                    <StackPanel HorizontalAlignment="Right" Orientation="Horizontal" Spacing="7">
+                        <Button
+                            MinWidth="64"
+                            AutomationProperties.AutomationId="CancelActionPlan"
+                            Click="OnCancelClicked"
+                            Content="Cancel"
+                            Style="{StaticResource PanelFooterButtonStyle}" />
+                        <Button
+                            x:Name="ConfirmButton"
+                            MinWidth="92"
+                            AutomationProperties.AutomationId="ConfirmActionPlan"
+                            Click="OnConfirmClicked"
+                            Content="Run action"
+                            Style="{StaticResource PanelFooterButtonStyle}" />
+                    </StackPanel>
+                </Grid>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>

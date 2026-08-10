@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Page
+    x:Class="Cursivis.Windows.App.Pages.BrowserIntegrationPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls="using:Cursivis.Windows.App.Controls">
+
+    <Grid x:Name="PageRoot" Padding="{StaticResource PagePadding}">
+        <VisualStateManager.VisualStateGroups>
+            <VisualStateGroup>
+                <VisualState>
+                    <VisualState.StateTriggers>
+                        <AdaptiveTrigger MinWindowWidth="0" />
+                    </VisualState.StateTriggers>
+                    <VisualState.Setters>
+                        <Setter Target="PageRoot.Padding" Value="{StaticResource PagePaddingNarrow}" />
+                    </VisualState.Setters>
+                </VisualState>
+                <VisualState>
+                    <VisualState.StateTriggers>
+                        <AdaptiveTrigger MinWindowWidth="760" />
+                    </VisualState.StateTriggers>
+                    <VisualState.Setters>
+                        <Setter Target="PageRoot.Padding" Value="{StaticResource PagePadding}" />
+                    </VisualState.Setters>
+                </VisualState>
+            </VisualStateGroup>
+        </VisualStateManager.VisualStateGroups>
+
+        <ScrollViewer HorizontalScrollMode="Disabled" VerticalScrollBarVisibility="Auto">
+            <StackPanel MaxWidth="920" HorizontalAlignment="Stretch" Spacing="20">
+                <controls:SettingsSectionHeader x:Uid="BrowserSectionHeader" />
+
+                <controls:SettingsCard x:Uid="BrowserHealthCard" IconGlyph="&#xE774;">
+                    <controls:SettingsCard.Body>
+                        <StackPanel Spacing="10">
+                            <controls:StatusIndicator x:Name="ExtensionStatus" x:Uid="BrowserExtensionStatus" Glyph="&#xE711;" />
+                            <controls:StatusIndicator x:Name="NativeHostStatus" x:Uid="BrowserNativeHostStatus" Glyph="&#xE711;" />
+                            <controls:StatusIndicator x:Name="PipeStatus" x:Uid="BrowserPipeStatus" Glyph="&#xE711;" />
+                            <controls:StatusIndicator x:Name="HandshakeStatus" x:Uid="BrowserHandshakeStatus" Glyph="&#xE946;" />
+                        </StackPanel>
+                    </controls:SettingsCard.Body>
+                </controls:SettingsCard>
+
+                <controls:SettingsCard x:Uid="BrowserSetupCard" IconGlyph="&#xE895;">
+                    <controls:SettingsCard.Body>
+                        <StackPanel Spacing="10">
+                            <TextBlock x:Uid="BrowserSetupStepOne" TextWrapping="Wrap" />
+                            <TextBlock x:Uid="BrowserSetupStepTwo" TextWrapping="Wrap" />
+                            <TextBlock x:Uid="BrowserSetupStepThree" TextWrapping="Wrap" />
+                            <TextBlock x:Uid="BrowserPermissionsHelp" Style="{StaticResource CaptionSecondaryTextStyle}" />
+                        </StackPanel>
+                    </controls:SettingsCard.Body>
+                </controls:SettingsCard>
+
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <Button
+                        x:Name="TestButton"
+                        x:Uid="BrowserTestButton"
+                        AutomationProperties.AutomationId="TestBrowserIntegration"
+                        Click="OnTestClicked" />
+                    <Button
+                        x:Name="RefreshButton"
+                        x:Uid="BrowserRepairButton"
+                        AutomationProperties.AutomationId="RepairBrowserIntegration"
+                        Click="OnRefreshClicked" />
+                </StackPanel>
+                <TextBlock x:Name="ActionStatus" x:Uid="BrowserActionsUnavailableHelp" Style="{StaticResource CaptionSecondaryTextStyle}" />
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</Page>

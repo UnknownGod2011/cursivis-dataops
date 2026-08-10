@@ -1,0 +1,54 @@
+name: Release Windows installer
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: windows-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.423
+          cache: true
+          cache-dependency-path: "**/packages.lock.json"
+
+      - name: Install Inno Setup
+        run: choco install innosetup --yes --no-progress
+
+      - name: Verify release sources
+        shell: pwsh
+        run: |
+          ./scripts/check-secrets.ps1
+          ./scripts/verify-extension.ps1
+
+      - name: Restore locked dependencies
+        run: dotnet restore Cursivis.sln --locked-mode -p:Platform=x64
+
+      - name: Build and test release
+        run: |
+          dotnet build Cursivis.sln -c Release -p:Platform=x64 --no-restore
+          dotnet test Cursivis.sln -c Release -p:Platform=x64 --no-build --no-restore
+
+      - name: Build self-contained installer
+        shell: pwsh
+        run: |
+          $version = "${{ github.ref_name }}".TrimStart('v')
+          ./scripts/build-release.ps1 -Version $version
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          body_path: docs/releases/v0.1.0-beta.1.md
+          generate_release_notes: true
+          files: |
+            artifacts/release/Cursivis-Setup-x64.exe
+            artifacts/release/Cursivis-Setup-*-x64.exe
+            artifacts/release/Cursivis-Setup-*-x64.exe.sha256

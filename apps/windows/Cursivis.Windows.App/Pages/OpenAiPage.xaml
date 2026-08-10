@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Page
+    x:Class="Cursivis.Windows.App.Pages.OpenAiPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls="using:Cursivis.Windows.App.Controls">
+
+    <Grid x:Name="PageRoot" Padding="{StaticResource PagePadding}">
+        <VisualStateManager.VisualStateGroups>
+            <VisualStateGroup>
+                <VisualState>
+                    <VisualState.StateTriggers>
+                        <AdaptiveTrigger MinWindowWidth="0" />
+                    </VisualState.StateTriggers>
+                    <VisualState.Setters>
+                        <Setter Target="PageRoot.Padding" Value="{StaticResource PagePaddingNarrow}" />
+                    </VisualState.Setters>
+                </VisualState>
+                <VisualState>
+                    <VisualState.StateTriggers>
+                        <AdaptiveTrigger MinWindowWidth="760" />
+                    </VisualState.StateTriggers>
+                    <VisualState.Setters>
+                        <Setter Target="PageRoot.Padding" Value="{StaticResource PagePadding}" />
+                    </VisualState.Setters>
+                </VisualState>
+            </VisualStateGroup>
+        </VisualStateManager.VisualStateGroups>
+
+        <ScrollViewer HorizontalScrollMode="Disabled" VerticalScrollBarVisibility="Auto">
+            <StackPanel MaxWidth="920" HorizontalAlignment="Stretch" Spacing="20">
+                <controls:SettingsSectionHeader x:Name="OpenAiHeader" x:Uid="OpenAiSectionHeader" />
+
+                <controls:SettingsCard x:Uid="OpenAiKeyCard" IconGlyph="&#xE8D7;">
+                    <controls:SettingsCard.Body>
+                        <StackPanel Spacing="8">
+                            <controls:SecureKeyInput
+                                x:Name="OpenAiKeyInput"
+                                AutomationProperties.AutomationId="OpenAiSecureKeyInput"
+                                HasSavedKey="False"
+                                IsSecureStorageAvailable="False"
+                                SaveRequested="OnSaveRequested"
+                                DeleteRequested="OnDeleteRequested"
+                                TestRequested="OnTestRequested" />
+                            <HyperlinkButton
+                                x:Uid="OpenAiGetApiKeyLink"
+                                AutomationProperties.AutomationId="OpenAiGetApiKeyLink"
+                                HorizontalAlignment="Left"
+                                NavigateUri="https://platform.openai.com/api-keys" />
+                        </StackPanel>
+                    </controls:SettingsCard.Body>
+                </controls:SettingsCard>
+
+                <controls:SettingsCard x:Uid="OpenAiQualityCard" IconGlyph="&#xE945;">
+                    <controls:SettingsCard.Body>
+                        <StackPanel Spacing="12">
+                            <TextBlock x:Name="QualityProfileLabel" x:Uid="QualityProfileLabel" FontWeight="SemiBold" />
+                            <ComboBox
+                                x:Name="QualityProfileComboBox"
+                                x:Uid="QualityProfileComboBox"
+                                AutomationProperties.AutomationId="QualityProfile"
+                                AutomationProperties.LabeledBy="{x:Bind QualityProfileLabel}"
+                                SelectionChanged="OnQualityProfileChanged">
+                                <ComboBoxItem x:Uid="EconomyProfileOption" Tag="Economy" />
+                                <ComboBoxItem x:Uid="BalancedProfileOption" Tag="Balanced" />
+                                <ComboBoxItem x:Uid="BestQualityProfileOption" Tag="Best" />
+                            </ComboBox>
+                            <TextBlock x:Uid="QualityProfileHelp" Style="{StaticResource CaptionSecondaryTextStyle}" />
+                        </StackPanel>
+                    </controls:SettingsCard.Body>
+                </controls:SettingsCard>
+
+                <controls:SettingsCard x:Uid="OpenAiModelsCard" IconGlyph="&#xE950;">
+                    <controls:SettingsCard.Body>
+                        <StackPanel Spacing="12">
+                            <Expander x:Uid="AdvancedModelsExpander">
+                                <StackPanel Spacing="14">
+                                    <StackPanel Spacing="6">
+                                        <TextBlock x:Name="ResponsesModelLabel" x:Uid="ResponsesModelLabel" FontWeight="SemiBold" />
+                                        <ComboBox
+                                            x:Name="ResponsesModelComboBox"
+                                            AutomationProperties.AutomationId="ResponsesModel"
+                                            AutomationProperties.LabeledBy="{x:Bind ResponsesModelLabel}"
+                                            SelectionChanged="OnAdvancedModelChanged">
+                                            <ComboBoxItem x:Uid="LunaModelOption" Tag="gpt-5.6-luna" />
+                                            <ComboBoxItem x:Uid="TerraModelOption" Tag="gpt-5.6-terra" />
+                                            <ComboBoxItem x:Uid="SolModelOption" Tag="gpt-5.6-sol" />
+                                        </ComboBox>
+                                    </StackPanel>
+
+                                    <StackPanel Spacing="6">
+                                        <TextBlock x:Name="RealtimeModelLabel" x:Uid="RealtimeModelLabel" FontWeight="SemiBold" />
+                                        <ComboBox
+                                            x:Name="RealtimeModelComboBox"
+                                            AutomationProperties.AutomationId="RealtimeModel"
+                                            AutomationProperties.LabeledBy="{x:Bind RealtimeModelLabel}"
+                                            SelectionChanged="OnAdvancedModelChanged">
+                                            <ComboBoxItem x:Uid="RealtimeModelOption" Tag="gpt-realtime-2.1" />
+                                            <ComboBoxItem x:Uid="RealtimeMiniModelOption" Tag="gpt-realtime-2.1-mini" />
+                                        </ComboBox>
+                                    </StackPanel>
+
+                                    <StackPanel Spacing="6">
+                                        <TextBlock x:Name="TranscriptionModelLabel" x:Uid="TranscriptionModelLabel" FontWeight="SemiBold" />
+                                        <ComboBox
+                                            x:Name="TranscriptionModelComboBox"
+                                            AutomationProperties.AutomationId="TranscriptionModel"
+                                            AutomationProperties.LabeledBy="{x:Bind TranscriptionModelLabel}"
+                                            SelectionChanged="OnAdvancedModelChanged">
+                                            <ComboBoxItem x:Uid="RealtimeWhisperModelOption" Tag="gpt-realtime-whisper" />
+                                            <ComboBoxItem x:Uid="MiniTranscribeModelOption" Tag="gpt-4o-mini-transcribe" />
+                                            <ComboBoxItem x:Uid="TranscribeModelOption" Tag="gpt-4o-transcribe" />
+                                        </ComboBox>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Expander>
+
+                            <HyperlinkButton
+                                x:Uid="OpenAiPricingLink"
+                                AutomationProperties.AutomationId="OpenAiPricingLink"
+                                HorizontalAlignment="Left"
+                                NavigateUri="https://developers.openai.com/api/docs/pricing" />
+                        </StackPanel>
+                    </controls:SettingsCard.Body>
+                </controls:SettingsCard>
+
+                <InfoBar
+                    x:Name="ConnectionInfo"
+                    x:Uid="OpenAiConnectionUnavailableInfo"
+                    IsClosable="False"
+                    IsOpen="True"
+                    Severity="Informational" />
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</Page>

@@ -1,0 +1,28 @@
+{
+  "version": 1,
+  "dependencies": {
+    "net8.0-windows10.0.19041": {
+      "cursivis.application": {
+        "type": "Project",
+        "dependencies": {
+          "Cursivis.Contracts": "[1.0.0, )",
+          "Cursivis.Domain": "[1.0.0, )"
+        }
+      },
+      "cursivis.contracts": {
+        "type": "Project"
+      },
+      "cursivis.domain": {
+        "type": "Project"
+      },
+      "cursivis.infrastructure.browserbridge": {
+        "type": "Project",
+        "dependencies": {
+          "Cursivis.Application": "[1.0.0, )",
+          "Cursivis.Contracts": "[1.0.0, )"
+        }
+      }
+    },
+    "net8.0-windows10.0.19041/win-x64": {}
+  }
+}

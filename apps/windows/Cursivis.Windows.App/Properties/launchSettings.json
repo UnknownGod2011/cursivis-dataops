@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "Cursivis.Windows.App (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "Cursivis.Windows.App (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}

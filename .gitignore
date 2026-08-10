@@ -1,0 +1,60 @@
+# Local credentials and environment overrides
+.env
+.env.*
+!.env.example
+*.pfx
+*.snk
+*.key
+*.pem
+secrets.json
+
+# .NET / Visual Studio
+**/bin/
+**/obj/
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+TestResults/
+coverage/
+coverage.*
+*.trx
+*.coverage
+*.coveragexml
+
+# Windows packaging and generated releases
+AppPackages/
+BundleArtifacts/
+artifacts/
+dist/
+publish/
+*.appx
+*.appxbundle
+*.msix
+*.msixbundle
+*.cer
+
+# Node / browser extension tests
+node_modules/
+playwright-report/
+test-results/
+blob-report/
+.playwright/
+
+# Runtime and user data
+logs/
+diagnostics/
+screenshots/
+recordings/
+browser-profiles/
+user-data/
+*.log
+*.dmp
+*.etl
+
+# OS/editor noise
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

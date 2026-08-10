@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Page
+    x:Class="Cursivis.Windows.App.Pages.AboutPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls="using:Cursivis.Windows.App.Controls">
+
+    <Grid x:Name="PageRoot" Padding="{StaticResource PagePadding}">
+        <VisualStateManager.VisualStateGroups>
+            <VisualStateGroup>
+                <VisualState>
+                    <VisualState.StateTriggers>
+                        <AdaptiveTrigger MinWindowWidth="0" />
+                    </VisualState.StateTriggers>
+                    <VisualState.Setters>
+                        <Setter Target="PageRoot.Padding" Value="{StaticResource PagePaddingNarrow}" />
+                    </VisualState.Setters>
+                </VisualState>
+                <VisualState>
+                    <VisualState.StateTriggers>
+                        <AdaptiveTrigger MinWindowWidth="760" />
+                    </VisualState.StateTriggers>
+                    <VisualState.Setters>
+                        <Setter Target="PageRoot.Padding" Value="{StaticResource PagePadding}" />
+                    </VisualState.Setters>
+                </VisualState>
+            </VisualStateGroup>
+        </VisualStateManager.VisualStateGroups>
+
+        <ScrollViewer HorizontalScrollMode="Disabled" VerticalScrollBarVisibility="Auto">
+            <StackPanel MaxWidth="920" HorizontalAlignment="Stretch" Spacing="20">
+                <controls:SettingsSectionHeader x:Uid="AboutSectionHeader" />
+
+                <controls:SettingsCard x:Uid="AboutProductCard" IconGlyph="&#xE946;">
+                    <controls:SettingsCard.Body>
+                        <Grid ColumnSpacing="16" RowSpacing="8">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+                            <TextBlock x:Uid="AboutVersionLabel" FontWeight="SemiBold" />
+                            <TextBlock Grid.Column="1" Text="{x:Bind VersionText}" />
+                            <TextBlock x:Uid="AboutCommitLabel" Grid.Row="1" FontWeight="SemiBold" />
+                            <TextBlock Grid.Row="1" Grid.Column="1" Text="{x:Bind BuildCommitText}" TextWrapping="Wrap" />
+                            <TextBlock x:Uid="AboutLicenseLabel" Grid.Row="2" FontWeight="SemiBold" />
+                            <TextBlock x:Uid="AboutLicenseValue" Grid.Row="2" Grid.Column="1" />
+                            <TextBlock x:Uid="AboutPlatformLabel" Grid.Row="3" FontWeight="SemiBold" />
+                            <TextBlock x:Uid="AboutPlatformValue" Grid.Row="3" Grid.Column="1" TextWrapping="Wrap" />
+                        </Grid>
+                    </controls:SettingsCard.Body>
+                </controls:SettingsCard>
+
+                <controls:SettingsCard x:Uid="AboutLinksCard" IconGlyph="&#xE71B;">
+                    <controls:SettingsCard.Body>
+                        <StackPanel Spacing="4">
+                            <HyperlinkButton
+                                x:Uid="AboutRepositoryLink"
+                                AutomationProperties.AutomationId="OpenCanonicalRepository"
+                                HorizontalAlignment="Left"
+                                NavigateUri="https://github.com/UnknownGod2011/openai-cursivis" />
+                            <HyperlinkButton
+                                x:Uid="AboutDocumentationLink"
+                                AutomationProperties.AutomationId="OpenRepositoryDocumentation"
+                                HorizontalAlignment="Left"
+                                NavigateUri="https://github.com/UnknownGod2011/openai-cursivis/tree/main/docs" />
+                            <HyperlinkButton
+                                x:Uid="AboutOpenAiDocsLink"
+                                AutomationProperties.AutomationId="OpenOpenAiDocumentation"
+                                HorizontalAlignment="Left"
+                                NavigateUri="https://developers.openai.com/api/docs" />
+                        </StackPanel>
+                    </controls:SettingsCard.Body>
+                </controls:SettingsCard>
+
+                <controls:SettingsCard x:Uid="AboutAcknowledgementCard" IconGlyph="&#xE8D4;">
+                    <controls:SettingsCard.Body>
+                        <TextBlock x:Uid="AboutAcknowledgementBody" TextWrapping="Wrap" />
+                    </controls:SettingsCard.Body>
+                </controls:SettingsCard>
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</Page>

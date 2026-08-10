@@ -1,0 +1,17 @@
+{
+  "manifest_version": 3,
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEArX61RUqSdNd3VDHE0qGnF1cNACD+gDN4O2JF984Qhq7zjqS/CNTBVBV/rQLiEoUnUhr/+ow6YU6L/ZGzPCGxhLJa4ImAb8p6rjH95gGUKfN4FNSVuQ0G3/JR85LYo3LqZYH2ObvLPljRP5DT4sahv99QNXPpX2U+DGnnH9CawK0IheuMD+FHrzwHhR4NQbfASZ/06VT+LBBbkDusjynIzIS3jdrgtX6m9VfRCTJMnquJ6bEAyOzgPScxwvwOevex9wMuU3bg1oirMLCcOb+bM4WvwNY5Q2FAfTYA1nXDsKliIiHH49waIa4QZzhfJBHfiOeahCZZIF0FBip8A0Ux7QIDAQAB",
+  "name": "Cursivis Browser Bridge",
+  "version": "0.1.0",
+  "description": "Connects the active browser tab to the local Cursivis desktop app with explicit per-site permission.",
+  "permissions": ["activeTab", "nativeMessaging", "scripting", "storage", "tabs"],
+  "optional_host_permissions": ["http://*/*", "https://*/*"],
+  "background": {
+    "service_worker": "service-worker.js",
+    "type": "module"
+  },
+  "action": {
+    "default_title": "Cursivis browser access"
+  },
+  "options_page": "options.html"
+}

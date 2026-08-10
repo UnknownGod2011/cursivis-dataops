@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "dependencies": {
+    "net8.0": {
+      "cursivis.application": {
+        "type": "Project",
+        "dependencies": {
+          "Cursivis.Contracts": "[1.0.0, )",
+          "Cursivis.Domain": "[1.0.0, )"
+        }
+      },
+      "cursivis.contracts": {
+        "type": "Project"
+      },
+      "cursivis.domain": {
+        "type": "Project"
+      }
+    },
+    "net8.0/win-x64": {}
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "dataset": "analytics.customer_360",
+  "owner": "urn:li:corpuser:data-platform",
+  "schema": [
+    { "fieldPath": "customer_id", "nativeDataType": "BIGINT" },
+    { "fieldPath": "lifetime_value_usd", "nativeDataType": "DECIMAL(18,2)" },
+    { "fieldPath": "customer_tier", "nativeDataType": "VARCHAR" }
+  ],
+  "upstream": ["staging.customers_clean"],
+  "downstream": ["dashboard.executive_revenue", "model.churn_prediction"]
+}

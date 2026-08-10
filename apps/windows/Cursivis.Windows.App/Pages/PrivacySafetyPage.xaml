@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Page
+    x:Class="Cursivis.Windows.App.Pages.PrivacySafetyPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls="using:Cursivis.Windows.App.Controls">
+
+    <Grid x:Name="PageRoot" Padding="{StaticResource PagePadding}">
+        <VisualStateManager.VisualStateGroups>
+            <VisualStateGroup>
+                <VisualState>
+                    <VisualState.StateTriggers>
+                        <AdaptiveTrigger MinWindowWidth="0" />
+                    </VisualState.StateTriggers>
+                    <VisualState.Setters>
+                        <Setter Target="PageRoot.Padding" Value="{StaticResource PagePaddingNarrow}" />
+                    </VisualState.Setters>
+                </VisualState>
+                <VisualState>
+                    <VisualState.StateTriggers>
+                        <AdaptiveTrigger MinWindowWidth="760" />
+                    </VisualState.StateTriggers>
+                    <VisualState.Setters>
+                        <Setter Target="PageRoot.Padding" Value="{StaticResource PagePadding}" />
+                    </VisualState.Setters>
+                </VisualState>
+            </VisualStateGroup>
+        </VisualStateManager.VisualStateGroups>
+
+        <ScrollViewer HorizontalScrollMode="Disabled" VerticalScrollBarVisibility="Auto">
+            <StackPanel MaxWidth="920" HorizontalAlignment="Stretch" Spacing="20">
+                <controls:SettingsSectionHeader x:Name="PrivacyHeader" x:Uid="PrivacySectionHeader" />
+
+                <controls:SettingsCard x:Uid="PrivacyScreenCard" IconGlyph="&#xE7F4;">
+                    <controls:SettingsCard.Body>
+                        <StackPanel Spacing="12">
+                            <TextBlock x:Uid="OneShotCaptureExplanation" TextWrapping="Wrap" />
+                            <TextBlock x:Uid="NavigationCaptureExplanation" TextWrapping="Wrap" />
+                            <TextBlock x:Uid="CaptureStopExplanation" Style="{StaticResource CaptionSecondaryTextStyle}" />
+                            <RadioButton
+                                x:Name="PrivacyActiveWindowOption"
+                                x:Uid="PrivacyActiveWindowOption"
+                                AutomationProperties.AutomationId="PrivacyCaptureActiveWindow"
+                                Checked="OnPrivacySettingChanged"
+                                GroupName="PrivacyCaptureScope"
+                                IsChecked="True" />
+                            <RadioButton
+                                x:Name="PrivacyDisplayOption"
+                                x:Uid="PrivacyDisplayOption"
+                                AutomationProperties.AutomationId="PrivacyCaptureDisplay"
+                                Checked="OnPrivacySettingChanged"
+                                GroupName="PrivacyCaptureScope" />
+                            <ToggleSwitch
+                                x:Name="AllowNavigationGuidanceToggle"
+                                x:Uid="AllowNavigationGuidanceToggle"
+                                AutomationProperties.AutomationId="AllowNavigationGuidanceCapture"
+                                Toggled="OnPrivacySettingChanged" />
+                        </StackPanel>
+                    </controls:SettingsCard.Body>
+                </controls:SettingsCard>
+
+                <controls:SettingsCard x:Uid="PrivacyMemoryCard" IconGlyph="&#xE90F;">
+                    <controls:SettingsCard.Body>
+                        <StackPanel Spacing="12">
+                            <ToggleSwitch
+                                x:Name="PersonalizationMemoryToggle"
+                                x:Uid="PersonalizationMemoryToggle"
+                                AutomationProperties.AutomationId="PersonalizationMemory"
+                                IsOn="False"
+                                Toggled="OnMemoryToggled" />
+                            <TextBlock x:Uid="MemoryBoundedHelp" Style="{StaticResource CaptionSecondaryTextStyle}" />
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <Button
+                                    x:Name="ViewMemoryButton"
+                                    x:Uid="ViewMemoryButton"
+                                    AutomationProperties.AutomationId="ViewMemory"
+                                    Click="OnViewMemoryClicked"
+                                    IsEnabled="False" />
+                                <Button
+                                    x:Name="ClearMemoryButton"
+                                    x:Uid="ClearMemoryButton"
+                                    AutomationProperties.AutomationId="ClearMemory"
+                                    Click="OnClearMemoryClicked"
+                                    IsEnabled="False" />
+                            </StackPanel>
+                        </StackPanel>
+                    </controls:SettingsCard.Body>
+                </controls:SettingsCard>
+
+                <controls:SettingsCard x:Uid="PrivacyDataCard" IconGlyph="&#xE8B7;">
+                    <controls:SettingsCard.Body>
+                        <StackPanel Spacing="12">
+                            <ToggleSwitch
+                                x:Name="ProtectedClipboardToggle"
+                                x:Uid="ProtectedClipboardToggle"
+                                AutomationProperties.AutomationId="ProtectedClipboardFallback"
+                                IsEnabled="False"
+                                IsOn="True" />
+                            <ToggleSwitch
+                                x:Uid="RedactedLoggingToggle"
+                                AutomationProperties.AutomationId="RedactedLogging"
+                                IsEnabled="False"
+                                IsOn="True" />
+                            <TextBlock x:Uid="ScreenshotRetentionPolicy" Style="{StaticResource CaptionSecondaryTextStyle}" />
+                            <TextBlock x:Uid="ExtensionKeyBoundary" Style="{StaticResource CaptionSecondaryTextStyle}" />
+                        </StackPanel>
+                    </controls:SettingsCard.Body>
+                </controls:SettingsCard>
+
+                <controls:SettingsCard x:Uid="PrivacyPolicyCard" IconGlyph="&#xE72E;">
+                    <controls:SettingsCard.Body>
+                        <StackPanel Spacing="8">
+                            <TextBlock x:Uid="PolicyNoConfirmation" TextWrapping="Wrap" />
+                            <TextBlock x:Uid="PolicyContextConfirmation" TextWrapping="Wrap" />
+                            <TextBlock x:Uid="PolicyAlwaysConfirmation" TextWrapping="Wrap" />
+                            <TextBlock x:Uid="PolicyQuickTaskBoundary" Style="{StaticResource CaptionSecondaryTextStyle}" />
+                        </StackPanel>
+                    </controls:SettingsCard.Body>
+                </controls:SettingsCard>
+
+                <InfoBar
+                    x:Uid="PrivacyDefaultsInfo"
+                    IsClosable="False"
+                    IsOpen="True"
+                    Severity="Success" />
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</Page>

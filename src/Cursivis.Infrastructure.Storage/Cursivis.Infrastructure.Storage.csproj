@@ -1,0 +1,13 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <RootNamespace>Cursivis.Infrastructure.Storage</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Cursivis.Application\Cursivis.Application.csproj" />
+    <ProjectReference Include="..\Cursivis.Domain\Cursivis.Domain.csproj" />
+  </ItemGroup>
+
+</Project>

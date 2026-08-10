@@ -1,0 +1,18 @@
+:root { color-scheme: light dark; font-family: "Segoe UI Variable", "Segoe UI", sans-serif; background: Canvas; color: CanvasText; }
+body { margin: 0; }
+main { max-width: 780px; margin: 0 auto; padding: 48px 24px; }
+.eyebrow { color: #8b5cf6; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+h1 { font-size: clamp(2rem, 6vw, 3.2rem); line-height: 1.06; margin: 8px 0 16px; }
+.lede { max-width: 62ch; opacity: .8; font-size: 1.08rem; line-height: 1.55; }
+section { display: grid; grid-template-columns: 1fr auto; gap: 12px 24px; align-items: center; border: 1px solid color-mix(in srgb, CanvasText 16%, transparent); border-radius: 16px; padding: 22px; margin-top: 18px; background: color-mix(in srgb, Canvas 94%, #8b5cf6 6%); }
+section > div { grid-column: 1; }
+section h2 { margin: 0 0 6px; }
+section p { margin: 0; opacity: .75; }
+.status { grid-column: 2; grid-row: 1; padding: 5px 10px; border-radius: 999px; font-weight: 650; }
+.neutral { background: color-mix(in srgb, CanvasText 10%, transparent); }
+.good { background: #0f7b4d; color: white; }
+.bad { background: #b42318; color: white; }
+button { justify-self: start; border: 0; border-radius: 8px; padding: 9px 15px; font: inherit; font-weight: 650; background: #7c3aed; color: white; cursor: pointer; }
+button.secondary { background: transparent; color: CanvasText; border: 1px solid color-mix(in srgb, CanvasText 25%, transparent); }
+button:focus-visible { outline: 3px solid Highlight; outline-offset: 3px; }
+@media (max-width: 560px) { section { grid-template-columns: 1fr; } .status { grid-column: 1; grid-row: auto; justify-self: start; } }

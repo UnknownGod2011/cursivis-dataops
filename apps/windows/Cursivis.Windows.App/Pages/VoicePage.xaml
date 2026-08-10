@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Page
+    x:Class="Cursivis.Windows.App.Pages.VoicePage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls="using:Cursivis.Windows.App.Controls">
+
+    <Grid x:Name="PageRoot" Padding="{StaticResource PagePadding}">
+        <VisualStateManager.VisualStateGroups>
+            <VisualStateGroup>
+                <VisualState>
+                    <VisualState.StateTriggers>
+                        <AdaptiveTrigger MinWindowWidth="0" />
+                    </VisualState.StateTriggers>
+                    <VisualState.Setters>
+                        <Setter Target="PageRoot.Padding" Value="{StaticResource PagePaddingNarrow}" />
+                    </VisualState.Setters>
+                </VisualState>
+                <VisualState>
+                    <VisualState.StateTriggers>
+                        <AdaptiveTrigger MinWindowWidth="760" />
+                    </VisualState.StateTriggers>
+                    <VisualState.Setters>
+                        <Setter Target="PageRoot.Padding" Value="{StaticResource PagePadding}" />
+                    </VisualState.Setters>
+                </VisualState>
+            </VisualStateGroup>
+        </VisualStateManager.VisualStateGroups>
+
+        <ScrollViewer HorizontalScrollMode="Disabled" VerticalScrollBarVisibility="Auto">
+            <StackPanel MaxWidth="920" HorizontalAlignment="Stretch" Spacing="20">
+                <controls:SettingsSectionHeader x:Uid="VoiceSectionHeader" />
+
+                <controls:SettingsCard x:Uid="VoiceMicrophoneCard" IconGlyph="&#xE720;">
+                    <controls:SettingsCard.Body>
+                        <StackPanel Spacing="14">
+                            <TextBlock x:Name="MicrophoneLabel" x:Uid="MicrophoneLabel" FontWeight="SemiBold" />
+                            <ComboBox
+                                x:Name="MicrophoneComboBox"
+                                x:Uid="MicrophoneComboBox"
+                                AutomationProperties.AutomationId="MicrophoneEndpoint"
+                                AutomationProperties.LabeledBy="{x:Bind MicrophoneLabel}"
+                                SelectionChanged="OnPreferenceChanged"
+                                SelectedIndex="0">
+                                <ComboBoxItem x:Uid="NoMicrophoneOption" Tag="unavailable" />
+                            </ComboBox>
+                            <controls:StatusIndicator x:Name="MicrophonePermissionStatus" x:Uid="MicrophonePermissionStatus" Glyph="&#xE946;" />
+
+                            <TextBlock x:Name="MicrophoneLevelLabel" x:Uid="MicrophoneLevelLabel" FontWeight="SemiBold" />
+                            <ProgressBar
+                                x:Name="MicrophoneLevelMeter"
+                                x:Uid="MicrophoneLevelMeter"
+                                AutomationProperties.AutomationId="MicrophoneLevelMeter"
+                                AutomationProperties.LabeledBy="{x:Bind MicrophoneLevelLabel}"
+                                IsIndeterminate="False"
+                                Maximum="100"
+                                Value="0" />
+                            <TextBlock x:Uid="MicrophoneMeterIdleHelp" Style="{StaticResource CaptionSecondaryTextStyle}" />
+                            <Button
+                                x:Name="AudioTestButton"
+                                x:Uid="AudioTestButton"
+                                AutomationProperties.AutomationId="TestMicrophoneAudio"
+                                Click="OnAudioTestClicked"
+                                HorizontalAlignment="Left" />
+                        </StackPanel>
+                    </controls:SettingsCard.Body>
+                </controls:SettingsCard>
+
+                <controls:SettingsCard x:Uid="VoicePreferencesCard" IconGlyph="&#xE767;">
+                    <controls:SettingsCard.Body>
+                        <StackPanel Spacing="14">
+                            <StackPanel Spacing="4">
+                                <TextBlock x:Name="AssistantVoiceLabel" x:Uid="AssistantVoiceLabel" FontWeight="SemiBold" />
+                                <ComboBox
+                                    x:Name="AssistantVoiceComboBox"
+                                    AutomationProperties.AutomationId="AssistantVoice"
+                                    AutomationProperties.LabeledBy="{x:Bind AssistantVoiceLabel}"
+                                    SelectedIndex="0"
+                                    SelectionChanged="OnPreferenceChanged">
+                                    <ComboBoxItem x:Uid="ServerDefaultVoiceOption" Tag="server_default" />
+                                </ComboBox>
+                            </StackPanel>
+                            <StackPanel Spacing="4">
+                                <TextBlock x:Name="VoiceLanguageLabel" x:Uid="VoiceLanguageLabel" FontWeight="SemiBold" />
+                                <ComboBox
+                                    x:Name="VoiceLanguageComboBox"
+                                    AutomationProperties.AutomationId="VoiceLanguage"
+                                    AutomationProperties.LabeledBy="{x:Bind VoiceLanguageLabel}"
+                                    SelectedIndex="0"
+                                    SelectionChanged="OnPreferenceChanged">
+                                    <ComboBoxItem x:Uid="AutomaticLanguageOption" Tag="auto" />
+                                </ComboBox>
+                            </StackPanel>
+                            <StackPanel Spacing="4">
+                                <TextBlock x:Name="PauseSensitivityLabel" x:Uid="PauseSensitivityLabel" FontWeight="SemiBold" />
+                                <Slider
+                                    x:Name="PauseSensitivitySlider"
+                                    x:Uid="PauseSensitivitySlider"
+                                    AutomationProperties.AutomationId="PauseSensitivity"
+                                    AutomationProperties.LabeledBy="{x:Bind PauseSensitivityLabel}"
+                                    LargeChange="1"
+                                    Maximum="4"
+                                    Minimum="0"
+                                    SmallChange="1"
+                                    StepFrequency="1"
+                                    Value="2"
+                                    ValueChanged="OnPauseSensitivityChanged" />
+                                <TextBlock x:Uid="PauseSensitivityHelp" Style="{StaticResource CaptionSecondaryTextStyle}" />
+                            </StackPanel>
+                            <StackPanel Spacing="4">
+                                <TextBlock FontWeight="SemiBold" Text="Live transcript panel" />
+                                <ToggleSwitch
+                                    x:Name="LiveTranscriptPanelToggle"
+                                    AutomationProperties.AutomationId="LiveTranscriptPanelVisible"
+                                    AutomationProperties.Name="Show Live transcript panel"
+                                    OffContent="Hidden"
+                                    OnContent="Visible"
+                                    Toggled="OnLiveTranscriptPanelToggled" />
+                                <TextBlock
+                                    Style="{StaticResource CaptionSecondaryTextStyle}"
+                                    Text="The eye control beside the Live orb can change this at any time." />
+                            </StackPanel>
+                        </StackPanel>
+                    </controls:SettingsCard.Body>
+                </controls:SettingsCard>
+
+                <controls:SettingsCard x:Uid="VoiceRealtimeCard" IconGlyph="&#xE768;">
+                    <controls:SettingsCard.Body>
+                        <StackPanel Spacing="12">
+                            <controls:StatusIndicator x:Name="RealtimeConnectionStatus" x:Uid="RealtimeConnectionStatus" Glyph="&#xE711;" />
+                            <Button
+                                x:Name="RealtimeConnectionTestButton"
+                                x:Uid="RealtimeConnectionTestButton"
+                                AutomationProperties.AutomationId="TestRealtimeConnection"
+                                Click="OnRealtimeConnectionTestClicked"
+                                HorizontalAlignment="Left" />
+                            <TextBlock x:Uid="RealtimeTestUnavailableHelp" Style="{StaticResource CaptionSecondaryTextStyle}" />
+                        </StackPanel>
+                    </controls:SettingsCard.Body>
+                </controls:SettingsCard>
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</Page>

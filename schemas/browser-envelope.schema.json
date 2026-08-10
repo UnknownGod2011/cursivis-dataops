@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cursivis.app/schemas/browser-envelope.v1.json",
+  "title": "Cursivis Browser Envelope",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["protocolVersion", "type", "correlationId", "sentAt", "payload"],
+  "properties": {
+    "protocolVersion": { "const": 1 },
+    "type": {
+      "type": "string",
+      "enum": ["hello", "welcome", "get_selection", "selection", "discover_form", "form", "execute", "step_result", "health", "error"]
+    },
+    "correlationId": { "type": "string", "minLength": 1, "maxLength": 96, "pattern": "^[A-Za-z0-9._:-]+$" },
+    "sentAt": { "type": "string", "format": "date-time" },
+    "payload": { "type": "object" },
+    "sessionToken": { "type": ["string", "null"], "minLength": 40, "maxLength": 128 }
+  }
+}

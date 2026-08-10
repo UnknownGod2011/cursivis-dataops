@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Cursivis Browser Access</title>
+  <link rel="stylesheet" href="options.css">
+</head>
+<body>
+  <main>
+    <p class="eyebrow">Cursivis Browser Bridge</p>
+    <h1>Access only the sites you choose</h1>
+    <p class="lede">Cursivis reads selection and visible form structure only after you grant the active site. The extension never receives your OpenAI key.</p>
+    <section aria-labelledby="connection-heading">
+      <div>
+        <h2 id="connection-heading">Desktop connection</h2>
+        <p id="connection-detail">Checking the local native host…</p>
+      </div>
+      <span id="connection-status" class="status neutral">Unverified</span>
+      <button id="connect" type="button">Test connection</button>
+    </section>
+    <section aria-labelledby="permission-heading">
+      <div>
+        <h2 id="permission-heading">Active site permission</h2>
+        <p id="site-detail">Open a normal web page, then return here to grant that site.</p>
+      </div>
+      <span id="site-status" class="status neutral">Not granted</span>
+      <button id="grant" type="button">Grant active site</button>
+      <button id="revoke" class="secondary" type="button">Remove active site</button>
+    </section>
+    <p id="announcement" role="status" aria-live="polite"></p>
+  </main>
+  <script src="options.js"></script>
+</body>
+</html>

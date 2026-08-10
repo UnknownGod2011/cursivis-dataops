@@ -1,0 +1,33 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Cursivis.Contracts\Cursivis.Contracts.csproj" />
+    <ProjectReference Include="..\Cursivis.Domain\Cursivis.Domain.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource
+      Include="..\..\schemas\smart-result.schema.json"
+      Link="Schemas\smart-result.schema.json"
+      LogicalName="Cursivis.Schemas.SmartResult" />
+    <EmbeddedResource
+      Include="..\..\schemas\quick-task-draft.schema.json"
+      Link="Schemas\quick-task-draft.schema.json"
+      LogicalName="Cursivis.Schemas.QuickTaskDraft" />
+    <EmbeddedResource
+      Include="..\..\schemas\guided-options.schema.json"
+      Link="Schemas\guided-options.schema.json"
+      LogicalName="Cursivis.Schemas.GuidedOptions" />
+    <EmbeddedResource
+      Include="..\..\schemas\browser-action-plan.schema.json"
+      Link="Schemas\browser-action-plan.schema.json"
+      LogicalName="Cursivis.Schemas.BrowserActionPlan" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0-windows10.0.19041.0</TargetFramework>
+
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="coverlet.collector" Version="6.0.4" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
+    <PackageReference Include="xunit" Version="2.9.2" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="3.0.2" PrivateAssets="all" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Cursivis.Application\Cursivis.Application.csproj" />
+    <ProjectReference Include="..\..\src\Cursivis.Infrastructure.BrowserBridge\Cursivis.Infrastructure.BrowserBridge.csproj" />
+    <ProjectReference Include="..\..\src\Cursivis.Infrastructure.OpenAI\Cursivis.Infrastructure.OpenAI.csproj" />
+    <ProjectReference Include="..\..\src\Cursivis.Infrastructure.Storage\Cursivis.Infrastructure.Storage.csproj" />
+    <ProjectReference Include="..\..\apps\windows\Cursivis.Windows.Platform\Cursivis.Windows.Platform.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Xunit" />
+  </ItemGroup>
+
+</Project>

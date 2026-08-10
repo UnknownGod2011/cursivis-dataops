@@ -1,0 +1,79 @@
+name: CI
+
+on:
+  push:
+    branches: [main, "codex/**"]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  website:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: website
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: website/package-lock.json
+
+      - name: Install locked website dependencies
+        run: npm ci --ignore-scripts
+
+      - name: Build and test static website
+        run: npm test
+
+      - name: Lint website
+        run: npm run lint
+
+      - name: Audit production dependencies
+        run: npm audit --omit=dev --audit-level=moderate
+
+  windows:
+    runs-on: windows-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.423
+          cache: true
+          cache-dependency-path: "**/packages.lock.json"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Verify secrets stay local
+        shell: pwsh
+        run: ./scripts/check-secrets.ps1
+
+      - name: Validate browser extension sources
+        shell: pwsh
+        run: ./scripts/verify-extension.ps1
+
+      - name: Restore locked dependencies
+        run: dotnet restore Cursivis.sln --locked-mode -r win-x64 -p:Platform=x64
+
+      - name: Build release
+        run: dotnet build Cursivis.sln -c Release -p:Platform=x64 --no-restore
+
+      - name: Run deterministic tests
+        run: dotnet test Cursivis.sln -c Release -p:Platform=x64 --no-build --no-restore --logger "trx;LogFileName=tests.trx"
+
+      - name: Upload test results on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: "**/TestResults/*.trx"
+          if-no-files-found: ignore
+          retention-days: 7

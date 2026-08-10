@@ -1,0 +1,263 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <ResourceDictionary.ThemeDictionaries>
+        <ResourceDictionary x:Key="Default">
+            <SolidColorBrush x:Key="OverlayShellBrush" Color="#D021262D" />
+            <SolidColorBrush x:Key="OverlayHeaderBrush" Color="#C8101418" />
+            <SolidColorBrush x:Key="OverlayContentBrush" Color="#C8101418" />
+            <SolidColorBrush x:Key="OverlayBorderBrush" Color="#1CFFFFFF" />
+            <SolidColorBrush x:Key="OverlayHairlineBrush" Color="#1AFFFFFF" />
+            <SolidColorBrush x:Key="OverlayTextBrush" Color="#FFF5F7FA" />
+            <SolidColorBrush x:Key="OverlayMutedTextBrush" Color="#FFA9B0B8" />
+            <SolidColorBrush x:Key="OverlaySubtleTextBrush" Color="#FF7A828C" />
+            <SolidColorBrush x:Key="OverlayButtonBrush" Color="#1AFFFFFF" />
+            <SolidColorBrush x:Key="OverlayButtonHoverBrush" Color="#2AFFFFFF" />
+            <SolidColorBrush x:Key="OverlayButtonPressedBrush" Color="#12161A" />
+            <SolidColorBrush x:Key="OverlayPrimaryButtonBrush" Color="#FF2C323A" />
+            <SolidColorBrush x:Key="OverlayPrimaryButtonTextBrush" Color="#FFF7FAFF" />
+            <SolidColorBrush x:Key="OverlayNoticeBrush" Color="#FF222E3B" />
+            <SolidColorBrush x:Key="OverlayErrorBrush" Color="#FF3A2226" />
+            <SolidColorBrush x:Key="OverlayErrorBorderBrush" Color="#FF9D4954" />
+            <SolidColorBrush x:Key="OverlayErrorTextBrush" Color="#FFFFB8C0" />
+            <SolidColorBrush x:Key="OrbIdleBrush" Color="#FF8F98A6" />
+            <SolidColorBrush x:Key="OrbListeningBrush" Color="#FF39D9A0" />
+            <SolidColorBrush x:Key="OrbThinkingBrush" Color="#FF8EA0FF" />
+            <SolidColorBrush x:Key="OrbGeneratingBrush" Color="#FFB28BFF" />
+            <SolidColorBrush x:Key="OrbSpeakingBrush" Color="#FFF477B5" />
+            <SolidColorBrush x:Key="OrbGuidingBrush" Color="#FF43D8CE" />
+            <SolidColorBrush x:Key="OrbExecutingBrush" Color="#FFFFC15A" />
+            <SolidColorBrush x:Key="OrbDoneBrush" Color="#FF4BDD84" />
+            <SolidColorBrush x:Key="OrbCancelledBrush" Color="#FFA2AAB5" />
+            <SolidColorBrush x:Key="OrbErrorBrush" Color="#FFFF7180" />
+            <SolidColorBrush x:Key="OrbCoreBrush" Color="#EE0F141B" />
+            <SolidColorBrush x:Key="OrbCoreBorderBrush" Color="#60FFFFFF" />
+            <SolidColorBrush x:Key="OrbBadgeBrush" Color="#58141B23" />
+            <SolidColorBrush x:Key="OrbChipBrush" Color="#C411151A" />
+        </ResourceDictionary>
+
+        <ResourceDictionary x:Key="Light">
+            <SolidColorBrush x:Key="OverlayShellBrush" Color="#D0FFFFFF" />
+            <SolidColorBrush x:Key="OverlayHeaderBrush" Color="#B8FFFFFF" />
+            <SolidColorBrush x:Key="OverlayContentBrush" Color="#B2FFFFFF" />
+            <SolidColorBrush x:Key="OverlayBorderBrush" Color="#12000000" />
+            <SolidColorBrush x:Key="OverlayHairlineBrush" Color="#10000000" />
+            <SolidColorBrush x:Key="OverlayTextBrush" Color="#FF111418" />
+            <SolidColorBrush x:Key="OverlayMutedTextBrush" Color="#FF67707A" />
+            <SolidColorBrush x:Key="OverlaySubtleTextBrush" Color="#FF8C949C" />
+            <SolidColorBrush x:Key="OverlayButtonBrush" Color="#EDFFFFFF" />
+            <SolidColorBrush x:Key="OverlayButtonHoverBrush" Color="#FFFFFFFF" />
+            <SolidColorBrush x:Key="OverlayButtonPressedBrush" Color="#FFF0F2F3" />
+            <SolidColorBrush x:Key="OverlayPrimaryButtonBrush" Color="#FF14141A" />
+            <SolidColorBrush x:Key="OverlayPrimaryButtonTextBrush" Color="#FFFFFFFF" />
+            <SolidColorBrush x:Key="OverlayNoticeBrush" Color="#FFEAF3FC" />
+            <SolidColorBrush x:Key="OverlayErrorBrush" Color="#FFFFECEE" />
+            <SolidColorBrush x:Key="OverlayErrorBorderBrush" Color="#FFE3A1AA" />
+            <SolidColorBrush x:Key="OverlayErrorTextBrush" Color="#FF8A1F31" />
+            <SolidColorBrush x:Key="OrbIdleBrush" Color="#FF687383" />
+            <SolidColorBrush x:Key="OrbListeningBrush" Color="#FF087E5B" />
+            <SolidColorBrush x:Key="OrbThinkingBrush" Color="#FF5368D8" />
+            <SolidColorBrush x:Key="OrbGeneratingBrush" Color="#FF7651CE" />
+            <SolidColorBrush x:Key="OrbSpeakingBrush" Color="#FFB63273" />
+            <SolidColorBrush x:Key="OrbGuidingBrush" Color="#FF087F78" />
+            <SolidColorBrush x:Key="OrbExecutingBrush" Color="#FF9A6400" />
+            <SolidColorBrush x:Key="OrbDoneBrush" Color="#FF087A42" />
+            <SolidColorBrush x:Key="OrbCancelledBrush" Color="#FF687383" />
+            <SolidColorBrush x:Key="OrbErrorBrush" Color="#FFB42335" />
+            <SolidColorBrush x:Key="OrbCoreBrush" Color="#F0FFFFFF" />
+            <SolidColorBrush x:Key="OrbCoreBorderBrush" Color="#18000000" />
+            <SolidColorBrush x:Key="OrbBadgeBrush" Color="#E8FFFFFF" />
+            <SolidColorBrush x:Key="OrbChipBrush" Color="#E7FFFFFF" />
+        </ResourceDictionary>
+
+        <ResourceDictionary x:Key="HighContrast">
+            <SolidColorBrush x:Key="OverlayShellBrush" Color="{ThemeResource SystemColorWindowColor}" />
+            <SolidColorBrush x:Key="OverlayHeaderBrush" Color="{ThemeResource SystemColorWindowColor}" />
+            <SolidColorBrush x:Key="OverlayContentBrush" Color="{ThemeResource SystemColorWindowColor}" />
+            <SolidColorBrush x:Key="OverlayBorderBrush" Color="{ThemeResource SystemColorWindowTextColor}" />
+            <SolidColorBrush x:Key="OverlayHairlineBrush" Color="{ThemeResource SystemColorWindowTextColor}" />
+            <SolidColorBrush x:Key="OverlayTextBrush" Color="{ThemeResource SystemColorWindowTextColor}" />
+            <SolidColorBrush x:Key="OverlayMutedTextBrush" Color="{ThemeResource SystemColorWindowTextColor}" />
+            <SolidColorBrush x:Key="OverlaySubtleTextBrush" Color="{ThemeResource SystemColorGrayTextColor}" />
+            <SolidColorBrush x:Key="OverlayButtonBrush" Color="{ThemeResource SystemColorButtonFaceColor}" />
+            <SolidColorBrush x:Key="OverlayButtonHoverBrush" Color="{ThemeResource SystemColorHighlightColor}" />
+            <SolidColorBrush x:Key="OverlayButtonPressedBrush" Color="{ThemeResource SystemColorHighlightColor}" />
+            <SolidColorBrush x:Key="OverlayPrimaryButtonBrush" Color="{ThemeResource SystemColorHighlightColor}" />
+            <SolidColorBrush x:Key="OverlayPrimaryButtonTextBrush" Color="{ThemeResource SystemColorHighlightTextColor}" />
+            <SolidColorBrush x:Key="OverlayNoticeBrush" Color="{ThemeResource SystemColorWindowColor}" />
+            <SolidColorBrush x:Key="OverlayErrorBrush" Color="{ThemeResource SystemColorWindowColor}" />
+            <SolidColorBrush x:Key="OverlayErrorBorderBrush" Color="{ThemeResource SystemColorWindowTextColor}" />
+            <SolidColorBrush x:Key="OverlayErrorTextBrush" Color="{ThemeResource SystemColorWindowTextColor}" />
+            <SolidColorBrush x:Key="OrbIdleBrush" Color="{ThemeResource SystemColorWindowTextColor}" />
+            <SolidColorBrush x:Key="OrbListeningBrush" Color="{ThemeResource SystemColorHighlightColor}" />
+            <SolidColorBrush x:Key="OrbThinkingBrush" Color="{ThemeResource SystemColorHighlightColor}" />
+            <SolidColorBrush x:Key="OrbGeneratingBrush" Color="{ThemeResource SystemColorHighlightColor}" />
+            <SolidColorBrush x:Key="OrbSpeakingBrush" Color="{ThemeResource SystemColorHighlightColor}" />
+            <SolidColorBrush x:Key="OrbGuidingBrush" Color="{ThemeResource SystemColorHighlightColor}" />
+            <SolidColorBrush x:Key="OrbExecutingBrush" Color="{ThemeResource SystemColorHighlightColor}" />
+            <SolidColorBrush x:Key="OrbDoneBrush" Color="{ThemeResource SystemColorHighlightColor}" />
+            <SolidColorBrush x:Key="OrbCancelledBrush" Color="{ThemeResource SystemColorGrayTextColor}" />
+            <SolidColorBrush x:Key="OrbErrorBrush" Color="{ThemeResource SystemColorHotlightColor}" />
+            <SolidColorBrush x:Key="OrbCoreBrush" Color="{ThemeResource SystemColorWindowColor}" />
+            <SolidColorBrush x:Key="OrbCoreBorderBrush" Color="{ThemeResource SystemColorWindowTextColor}" />
+            <SolidColorBrush x:Key="OrbBadgeBrush" Color="{ThemeResource SystemColorWindowColor}" />
+            <SolidColorBrush x:Key="OrbChipBrush" Color="{ThemeResource SystemColorWindowColor}" />
+        </ResourceDictionary>
+    </ResourceDictionary.ThemeDictionaries>
+
+    <Style x:Key="OverlayPillButtonStyle" TargetType="Button">
+        <Setter Property="MinHeight" Value="34" />
+        <Setter Property="Padding" Value="14,6" />
+        <Setter Property="CornerRadius" Value="17" />
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="FontWeight" Value="Normal" />
+        <Setter Property="Background" Value="{ThemeResource OverlayButtonBrush}" />
+        <Setter Property="Foreground" Value="{ThemeResource OverlayTextBrush}" />
+        <Setter Property="BorderBrush" Value="{ThemeResource OverlayBorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="HorizontalAlignment" Value="Stretch" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+
+    <Style x:Key="OverlayPrimaryPillButtonStyle" BasedOn="{StaticResource OverlayPillButtonStyle}" TargetType="Button">
+        <Setter Property="Background" Value="{ThemeResource OverlayPrimaryButtonBrush}" />
+        <Setter Property="Foreground" Value="{ThemeResource OverlayPrimaryButtonTextBrush}" />
+        <Setter Property="BorderThickness" Value="0" />
+    </Style>
+
+    <Style x:Key="OverlayIconButtonStyle" BasedOn="{StaticResource OverlayPillButtonStyle}" TargetType="Button">
+        <Setter Property="Width" Value="36" />
+        <Setter Property="MinWidth" Value="36" />
+        <Setter Property="Height" Value="36" />
+        <Setter Property="MinHeight" Value="36" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="CornerRadius" Value="18" />
+    </Style>
+
+    <Style x:Key="PanelToolbarButtonStyle" TargetType="Button">
+        <Setter Property="MinHeight" Value="28" />
+        <Setter Property="Padding" Value="10,4" />
+        <Setter Property="CornerRadius" Value="14" />
+        <Setter Property="FontSize" Value="11.5" />
+        <Setter Property="FontWeight" Value="Normal" />
+        <Setter Property="Background" Value="{ThemeResource OverlayButtonBrush}" />
+        <Setter Property="Foreground" Value="{ThemeResource OverlayTextBrush}" />
+        <Setter Property="BorderBrush" Value="{ThemeResource OverlayHairlineBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+
+    <Style x:Key="PanelIconButtonStyle" BasedOn="{StaticResource PanelToolbarButtonStyle}" TargetType="Button">
+        <Setter Property="Width" Value="34" />
+        <Setter Property="MinWidth" Value="34" />
+        <Setter Property="Height" Value="34" />
+        <Setter Property="MinHeight" Value="34" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="CornerRadius" Value="17" />
+    </Style>
+
+    <Style x:Key="PanelFooterButtonStyle" BasedOn="{StaticResource PanelToolbarButtonStyle}" TargetType="Button">
+        <Setter Property="Height" Value="27" />
+        <Setter Property="MinHeight" Value="27" />
+        <Setter Property="Padding" Value="9,3" />
+        <Setter Property="FontSize" Value="11" />
+        <Setter Property="CornerRadius" Value="14" />
+    </Style>
+
+    <Style x:Key="OrbActionChipStyle" TargetType="Button">
+        <Setter Property="Width" Value="104" />
+        <Setter Property="Height" Value="36" />
+        <Setter Property="MinHeight" Value="36" />
+        <Setter Property="Padding" Value="7,2" />
+        <Setter Property="CornerRadius" Value="18" />
+        <Setter Property="FontSize" Value="9.5" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Background" Value="{ThemeResource OrbChipBrush}" />
+        <Setter Property="Foreground" Value="{ThemeResource OverlayTextBrush}" />
+        <Setter Property="BorderBrush" Value="{ThemeResource OrbCoreBorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border
+                        x:Name="ChipSurface"
+                        Padding="{TemplateBinding Padding}"
+                        Background="{TemplateBinding Background}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        CornerRadius="{TemplateBinding CornerRadius}">
+                        <VisualStateManager.VisualStateGroups>
+                            <VisualStateGroup x:Name="CommonStates">
+                                <VisualState x:Name="Normal" />
+                                <VisualState x:Name="PointerOver">
+                                    <VisualState.Setters>
+                                        <Setter Target="ChipSurface.Background" Value="{ThemeResource OverlayButtonHoverBrush}" />
+                                        <Setter Target="ChipSurface.BorderBrush" Value="{ThemeResource OrbGuidingBrush}" />
+                                        <Setter Target="ChipContent.Opacity" Value="1" />
+                                    </VisualState.Setters>
+                                </VisualState>
+                                <VisualState x:Name="Pressed">
+                                    <VisualState.Setters>
+                                        <Setter Target="ChipSurface.Background" Value="{ThemeResource OverlayButtonPressedBrush}" />
+                                        <Setter Target="ChipSurface.BorderBrush" Value="{ThemeResource OrbGuidingBrush}" />
+                                        <Setter Target="ChipContent.Opacity" Value="1" />
+                                    </VisualState.Setters>
+                                </VisualState>
+                                <VisualState x:Name="Disabled">
+                                    <VisualState.Setters>
+                                        <Setter Target="ChipSurface.Opacity" Value="0.58" />
+                                        <Setter Target="ChipContent.Opacity" Value="1" />
+                                    </VisualState.Setters>
+                                </VisualState>
+                            </VisualStateGroup>
+                            <VisualStateGroup x:Name="FocusStates">
+                                <VisualState x:Name="Focused">
+                                    <VisualState.Setters>
+                                        <Setter Target="ChipSurface.BorderBrush" Value="{ThemeResource OrbGuidingBrush}" />
+                                        <Setter Target="ChipSurface.BorderThickness" Value="2" />
+                                    </VisualState.Setters>
+                                </VisualState>
+                                <VisualState x:Name="Unfocused" />
+                                <VisualState x:Name="PointerFocused" />
+                            </VisualStateGroup>
+                        </VisualStateManager.VisualStateGroups>
+                        <ContentPresenter
+                            x:Name="ChipContent"
+                            HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                            VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                            Content="{TemplateBinding Content}"
+                            ContentTemplate="{TemplateBinding ContentTemplate}"
+                            FontFamily="{TemplateBinding FontFamily}"
+                            FontSize="{TemplateBinding FontSize}"
+                            FontWeight="{TemplateBinding FontWeight}" />
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="OrbControlButtonStyle" TargetType="Button">
+        <Setter Property="Width" Value="26" />
+        <Setter Property="Height" Value="26" />
+        <Setter Property="MinWidth" Value="26" />
+        <Setter Property="MinHeight" Value="26" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="CornerRadius" Value="13" />
+        <Setter Property="Background" Value="{ThemeResource OrbChipBrush}" />
+        <Setter Property="Foreground" Value="{ThemeResource OverlayTextBrush}" />
+        <Setter Property="BorderBrush" Value="{ThemeResource OrbCoreBorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+    </Style>
+
+    <Style x:Key="OrbNavigationButtonStyle" TargetType="Button">
+        <Setter Property="MinWidth" Value="14" />
+        <Setter Property="MinHeight" Value="14" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="CornerRadius" Value="7" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Foreground" Value="{ThemeResource OverlayMutedTextBrush}" />
+        <Setter Property="BorderThickness" Value="0" />
+    </Style>
+</ResourceDictionary>

@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Page
+    x:Class="Cursivis.Windows.App.Pages.HotkeysPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls="using:Cursivis.Windows.App.Controls">
+
+    <Grid x:Name="PageRoot" Padding="{StaticResource PagePadding}">
+        <VisualStateManager.VisualStateGroups>
+            <VisualStateGroup>
+                <VisualState>
+                    <VisualState.StateTriggers>
+                        <AdaptiveTrigger MinWindowWidth="0" />
+                    </VisualState.StateTriggers>
+                    <VisualState.Setters>
+                        <Setter Target="PageRoot.Padding" Value="{StaticResource PagePaddingNarrow}" />
+                    </VisualState.Setters>
+                </VisualState>
+                <VisualState>
+                    <VisualState.StateTriggers>
+                        <AdaptiveTrigger MinWindowWidth="760" />
+                    </VisualState.StateTriggers>
+                    <VisualState.Setters>
+                        <Setter Target="PageRoot.Padding" Value="{StaticResource PagePadding}" />
+                    </VisualState.Setters>
+                </VisualState>
+            </VisualStateGroup>
+        </VisualStateManager.VisualStateGroups>
+
+        <ScrollViewer HorizontalScrollMode="Disabled" VerticalScrollBarVisibility="Auto">
+            <StackPanel MaxWidth="920" HorizontalAlignment="Stretch" Spacing="16">
+                <controls:SettingsSectionHeader x:Name="HotkeysHeader" x:Uid="HotkeysSectionHeader" />
+
+                <InfoBar
+                    x:Name="RegistrationInfo"
+                    x:Uid="HotkeysRegistrationInfo"
+                    IsClosable="False"
+                    IsOpen="True"
+                    Severity="Warning" />
+
+                <controls:HotkeyRecorder
+                    x:Name="ContextTriggerRecorder"
+                    x:Uid="ContextTriggerRecorder"
+                    CandidateCaptured="OnCandidateCaptured"
+                    RecorderAutomationId="RecordContextTrigger" />
+                <controls:HotkeyRecorder
+                    x:Name="LiveModeRecorder"
+                    x:Uid="LiveModeRecorder"
+                    CandidateCaptured="OnCandidateCaptured"
+                    RecorderAutomationId="RecordLiveMode" />
+                <controls:HotkeyRecorder
+                    x:Name="TakeActionRecorder"
+                    x:Uid="TakeActionRecorder"
+                    CandidateCaptured="OnCandidateCaptured"
+                    RecorderAutomationId="RecordTakeAction" />
+                <controls:HotkeyRecorder
+                    x:Name="DictationRecorder"
+                    x:Uid="DictationRecorder"
+                    CandidateCaptured="OnCandidateCaptured"
+                    RecorderAutomationId="RecordDictation" />
+                <controls:HotkeyRecorder
+                    x:Name="QuickTaskRecorder"
+                    x:Uid="QuickTaskRecorder"
+                    CandidateCaptured="OnCandidateCaptured"
+                    RecorderAutomationId="RecordQuickTask" />
+                <controls:HotkeyRecorder
+                    x:Name="CancelRecorder"
+                    x:Uid="CancelRecorder"
+                    CandidateCaptured="OnCandidateCaptured"
+                    RecorderAutomationId="RecordCancel" />
+                <controls:HotkeyRecorder
+                    x:Name="SettingsRecorder"
+                    x:Uid="SettingsRecorder"
+                    CandidateCaptured="OnCandidateCaptured"
+                    RecorderAutomationId="RecordSettings" />
+
+                <Button
+                    x:Uid="RestoreHotkeyDefaultsButton"
+                    AutomationProperties.AutomationId="RestoreHotkeyDefaults"
+                    Click="OnRestoreDefaultsClicked"
+                    HorizontalAlignment="Left" />
+                <TextBlock
+                    x:Name="HotkeyPageStatus"
+                    x:Uid="HotkeyPageInitialStatus"
+                    Style="{StaticResource CaptionSecondaryTextStyle}" />
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</Page>

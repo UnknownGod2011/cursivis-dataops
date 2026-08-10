@@ -1,0 +1,104 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "apps", "apps", "{E29B65E7-B6DE-4E0D-AD63-148C0872D136}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "windows", "windows", "{7AEB0743-7886-4F07-A1DB-A7F0BE702729}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cursivis.Windows.App", "apps\windows\Cursivis.Windows.App\Cursivis.Windows.App.csproj", "{5F4B9F77-6D9C-4567-9D93-34F9C775D416}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cursivis.Windows.NativeHost", "apps\windows\Cursivis.Windows.NativeHost\Cursivis.Windows.NativeHost.csproj", "{7E962A33-52F3-4B18-97DF-C9490BA90118}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cursivis.Windows.Platform", "apps\windows\Cursivis.Windows.Platform\Cursivis.Windows.Platform.csproj", "{B64FE0BB-5559-4C66-BF59-35449D3379CA}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{8A9AB9E3-E5D1-42FC-91EA-5A170006625F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cursivis.Application", "src\Cursivis.Application\Cursivis.Application.csproj", "{C98828C7-8852-47E9-8BAD-922A7BA03542}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cursivis.Contracts", "src\Cursivis.Contracts\Cursivis.Contracts.csproj", "{723B463F-8712-44E0-B258-B6F34B914041}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cursivis.Domain", "src\Cursivis.Domain\Cursivis.Domain.csproj", "{B956BF89-F8AE-4E1D-9D7A-752BB8624F23}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cursivis.Infrastructure.BrowserBridge", "src\Cursivis.Infrastructure.BrowserBridge\Cursivis.Infrastructure.BrowserBridge.csproj", "{47018503-E902-4337-A7EC-E3D2C68F916F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cursivis.Infrastructure.OpenAI", "src\Cursivis.Infrastructure.OpenAI\Cursivis.Infrastructure.OpenAI.csproj", "{E6034749-591B-4A6F-A3FB-D5FB7FBB5783}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cursivis.Infrastructure.Storage", "src\Cursivis.Infrastructure.Storage\Cursivis.Infrastructure.Storage.csproj", "{C7307432-BD12-4745-A549-FEF0EC4CBBA4}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{B104E727-99E6-4F0F-A786-C8F2977170EB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cursivis.IntegrationTests", "tests\Cursivis.IntegrationTests\Cursivis.IntegrationTests.csproj", "{A987C7EE-32CC-48E8-8550-490E89237D32}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cursivis.UnitTests", "tests\Cursivis.UnitTests\Cursivis.UnitTests.csproj", "{9D9B0ECF-184E-494A-B812-DEFBE80DAB63}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Release|x64 = Release|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{5F4B9F77-6D9C-4567-9D93-34F9C775D416}.Debug|x64.ActiveCfg = Debug|x64
+		{5F4B9F77-6D9C-4567-9D93-34F9C775D416}.Debug|x64.Build.0 = Debug|x64
+		{5F4B9F77-6D9C-4567-9D93-34F9C775D416}.Release|x64.ActiveCfg = Release|x64
+		{5F4B9F77-6D9C-4567-9D93-34F9C775D416}.Release|x64.Build.0 = Release|x64
+		{7E962A33-52F3-4B18-97DF-C9490BA90118}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{7E962A33-52F3-4B18-97DF-C9490BA90118}.Debug|x64.Build.0 = Debug|Any CPU
+		{7E962A33-52F3-4B18-97DF-C9490BA90118}.Release|x64.ActiveCfg = Release|Any CPU
+		{7E962A33-52F3-4B18-97DF-C9490BA90118}.Release|x64.Build.0 = Release|Any CPU
+		{B64FE0BB-5559-4C66-BF59-35449D3379CA}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{B64FE0BB-5559-4C66-BF59-35449D3379CA}.Debug|x64.Build.0 = Debug|Any CPU
+		{B64FE0BB-5559-4C66-BF59-35449D3379CA}.Release|x64.ActiveCfg = Release|Any CPU
+		{B64FE0BB-5559-4C66-BF59-35449D3379CA}.Release|x64.Build.0 = Release|Any CPU
+		{C98828C7-8852-47E9-8BAD-922A7BA03542}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{C98828C7-8852-47E9-8BAD-922A7BA03542}.Debug|x64.Build.0 = Debug|Any CPU
+		{C98828C7-8852-47E9-8BAD-922A7BA03542}.Release|x64.ActiveCfg = Release|Any CPU
+		{C98828C7-8852-47E9-8BAD-922A7BA03542}.Release|x64.Build.0 = Release|Any CPU
+		{723B463F-8712-44E0-B258-B6F34B914041}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{723B463F-8712-44E0-B258-B6F34B914041}.Debug|x64.Build.0 = Debug|Any CPU
+		{723B463F-8712-44E0-B258-B6F34B914041}.Release|x64.ActiveCfg = Release|Any CPU
+		{723B463F-8712-44E0-B258-B6F34B914041}.Release|x64.Build.0 = Release|Any CPU
+		{B956BF89-F8AE-4E1D-9D7A-752BB8624F23}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{B956BF89-F8AE-4E1D-9D7A-752BB8624F23}.Debug|x64.Build.0 = Debug|Any CPU
+		{B956BF89-F8AE-4E1D-9D7A-752BB8624F23}.Release|x64.ActiveCfg = Release|Any CPU
+		{B956BF89-F8AE-4E1D-9D7A-752BB8624F23}.Release|x64.Build.0 = Release|Any CPU
+		{47018503-E902-4337-A7EC-E3D2C68F916F}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{47018503-E902-4337-A7EC-E3D2C68F916F}.Debug|x64.Build.0 = Debug|Any CPU
+		{47018503-E902-4337-A7EC-E3D2C68F916F}.Release|x64.ActiveCfg = Release|Any CPU
+		{47018503-E902-4337-A7EC-E3D2C68F916F}.Release|x64.Build.0 = Release|Any CPU
+		{E6034749-591B-4A6F-A3FB-D5FB7FBB5783}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{E6034749-591B-4A6F-A3FB-D5FB7FBB5783}.Debug|x64.Build.0 = Debug|Any CPU
+		{E6034749-591B-4A6F-A3FB-D5FB7FBB5783}.Release|x64.ActiveCfg = Release|Any CPU
+		{E6034749-591B-4A6F-A3FB-D5FB7FBB5783}.Release|x64.Build.0 = Release|Any CPU
+		{C7307432-BD12-4745-A549-FEF0EC4CBBA4}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{C7307432-BD12-4745-A549-FEF0EC4CBBA4}.Debug|x64.Build.0 = Debug|Any CPU
+		{C7307432-BD12-4745-A549-FEF0EC4CBBA4}.Release|x64.ActiveCfg = Release|Any CPU
+		{C7307432-BD12-4745-A549-FEF0EC4CBBA4}.Release|x64.Build.0 = Release|Any CPU
+		{A987C7EE-32CC-48E8-8550-490E89237D32}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{A987C7EE-32CC-48E8-8550-490E89237D32}.Debug|x64.Build.0 = Debug|Any CPU
+		{A987C7EE-32CC-48E8-8550-490E89237D32}.Release|x64.ActiveCfg = Release|Any CPU
+		{A987C7EE-32CC-48E8-8550-490E89237D32}.Release|x64.Build.0 = Release|Any CPU
+		{9D9B0ECF-184E-494A-B812-DEFBE80DAB63}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{9D9B0ECF-184E-494A-B812-DEFBE80DAB63}.Debug|x64.Build.0 = Debug|Any CPU
+		{9D9B0ECF-184E-494A-B812-DEFBE80DAB63}.Release|x64.ActiveCfg = Release|Any CPU
+		{9D9B0ECF-184E-494A-B812-DEFBE80DAB63}.Release|x64.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{7AEB0743-7886-4F07-A1DB-A7F0BE702729} = {E29B65E7-B6DE-4E0D-AD63-148C0872D136}
+		{5F4B9F77-6D9C-4567-9D93-34F9C775D416} = {7AEB0743-7886-4F07-A1DB-A7F0BE702729}
+		{7E962A33-52F3-4B18-97DF-C9490BA90118} = {7AEB0743-7886-4F07-A1DB-A7F0BE702729}
+		{B64FE0BB-5559-4C66-BF59-35449D3379CA} = {7AEB0743-7886-4F07-A1DB-A7F0BE702729}
+		{C98828C7-8852-47E9-8BAD-922A7BA03542} = {8A9AB9E3-E5D1-42FC-91EA-5A170006625F}
+		{723B463F-8712-44E0-B258-B6F34B914041} = {8A9AB9E3-E5D1-42FC-91EA-5A170006625F}
+		{B956BF89-F8AE-4E1D-9D7A-752BB8624F23} = {8A9AB9E3-E5D1-42FC-91EA-5A170006625F}
+		{47018503-E902-4337-A7EC-E3D2C68F916F} = {8A9AB9E3-E5D1-42FC-91EA-5A170006625F}
+		{E6034749-591B-4A6F-A3FB-D5FB7FBB5783} = {8A9AB9E3-E5D1-42FC-91EA-5A170006625F}
+		{C7307432-BD12-4745-A549-FEF0EC4CBBA4} = {8A9AB9E3-E5D1-42FC-91EA-5A170006625F}
+		{A987C7EE-32CC-48E8-8550-490E89237D32} = {B104E727-99E6-4F0F-A786-C8F2977170EB}
+		{9D9B0ECF-184E-494A-B812-DEFBE80DAB63} = {B104E727-99E6-4F0F-A786-C8F2977170EB}
+	EndGlobalSection
+EndGlobal

@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cursivis.app/schemas/quick-task-draft.v1.json",
+  "title": "Cursivis Quick Task Draft",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "displayName", "finalizedInstruction", "supportedContext", "outputMode", "mayProposeAction", "safetyConcerns"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "displayName": { "type": "string", "minLength": 1, "maxLength": 64 },
+    "finalizedInstruction": { "type": "string", "minLength": 40, "maxLength": 8000 },
+    "supportedContext": { "type": "string", "enum": ["text", "image", "text_and_image"] },
+    "outputMode": { "type": "string", "enum": ["replacement_text", "analysis", "structured_data", "suggested_action"] },
+    "mayProposeAction": { "type": "boolean" },
+    "safetyConcerns": { "type": "array", "maxItems": 10, "items": { "type": "string", "minLength": 1, "maxLength": 200 } }
+  }
+}
