@@ -3,8 +3,25 @@ param()
 
 $ErrorActionPreference = 'Stop'
 $root = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
-$cli = Join-Path $root '.tools\datahub-venv\Scripts\datahub.exe'
-if (-not (Test-Path $cli)) { throw 'Run .\scripts\bootstrap-datahub.ps1 first.' }
-& $cli docker ingest-sample-data
-if ($LASTEXITCODE -ne 0) { throw 'DataHub sample metadata ingestion failed.' }
-Write-Host 'Sample metadata is available. For the scripted Cursivis story, use the assets and expected evidence in examples/.'
+$python = Join-Path $root '.tools\datahub-venv\Scripts\python.exe'
+$seed = Join-Path $PSScriptRoot 'seed_demo_data.py'
+
+if (-not (Test-Path $python)) { throw 'Run .\scripts\bootstrap-datahub.ps1 first.' }
+if (-not (Test-Path $seed)) { throw 'Missing scripts\seed_demo_data.py.' }
+
+if ([string]::IsNullOrWhiteSpace($env:DATAHUB_GMS_URL)) {
+    $env:DATAHUB_GMS_URL = 'http://localhost:8080'
+}
+if ([string]::IsNullOrWhiteSpace($env:DATAHUB_GRAPHQL_URL)) {
+    $env:DATAHUB_GRAPHQL_URL = "$($env:DATAHUB_GMS_URL.TrimEnd('/'))/api/graphql"
+}
+
+Write-Host 'Seeding deterministic Cursivis DataOps demo metadata into DataHub...'
+& $python $seed
+if ($LASTEXITCODE -ne 0) {
+    throw 'Deterministic DataHub demo metadata seed or verification failed.'
+}
+
+Write-Host 'Cursivis DataOps demo catalog is ready and verified.' -ForegroundColor Green
+Write-Host 'Canonical asset: postgres / analytics.customers / PROD'
+Write-Host 'Use examples\broken-query.sql for the golden demo.'
