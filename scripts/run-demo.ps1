@@ -32,7 +32,10 @@ if ([string]::IsNullOrWhiteSpace($env:DATAHUB_MCP_COMMAND)) {
     $env:DATAHUB_MCP_COMMAND = $uvx
 }
 if ([string]::IsNullOrWhiteSpace($env:DATAHUB_MCP_PACKAGE)) {
-    $env:DATAHUB_MCP_PACKAGE = 'mcp-server-datahub@latest'
+    # Pin the official MCP server used by the submission. This release exposes
+    # search/get_entities/list_schema_fields/get_lineage and save_document, and
+    # requires Python 3.11+. Avoid @latest so judging is reproducible.
+    $env:DATAHUB_MCP_PACKAGE = 'mcp-server-datahub@0.6.0'
 }
 
 try {
@@ -53,5 +56,6 @@ if (-not (Test-Path $app)) { throw "Expected application executable was not prod
 
 Start-Process -FilePath $app
 Write-Host 'Cursivis DataOps launched with a verified local DataHub catalog and official MCP runtime.' -ForegroundColor Green
+Write-Host "Pinned MCP package: $($env:DATAHUB_MCP_PACKAGE)"
 Write-Host 'Golden demo: select examples\broken-query.sql and invoke the configured context hotkey.'
 Write-Host 'Grounding uses DataHub MCP search/get_entities/list_schema_fields/get_lineage; confirmed Save to DataHub uses MCP save_document + read-after-write.'
