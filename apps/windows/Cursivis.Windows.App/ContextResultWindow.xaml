@@ -216,6 +216,16 @@
                                 HorizontalAlignment="Right"
                                 Orientation="Horizontal">
                                 <Button
+                                    x:Name="SaveToDataHubButton"
+                                    MinWidth="104"
+                                    Margin="0,0,6,0"
+                                    AutomationProperties.AutomationId="ContextResultSaveToDataHub"
+                                    AutomationProperties.Name="Save reviewed resolution to DataHub"
+                                    Click="OnSaveToDataHubClicked"
+                                    Content="Save to DataHub"
+                                    IsEnabled="False"
+                                    Style="{StaticResource PanelFooterButtonStyle}" />
+                                <Button
                                     x:Name="RefineButton"
                                     x:Uid="ContextResultRefineButton"
                                     MinWidth="54"
