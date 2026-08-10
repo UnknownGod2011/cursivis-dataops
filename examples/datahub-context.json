@@ -1,11 +1,14 @@
 {
-  "dataset": "analytics.customer_360",
-  "owner": "urn:li:corpuser:data-platform",
+  "dataset": "analytics.customers",
+  "platform": "postgres",
+  "environment": "PROD",
+  "owner": "urn:li:corpuser:datahub",
   "schema": [
-    { "fieldPath": "customer_id", "nativeDataType": "BIGINT" },
-    { "fieldPath": "lifetime_value_usd", "nativeDataType": "DECIMAL(18,2)" },
-    { "fieldPath": "customer_tier", "nativeDataType": "VARCHAR" }
+    { "fieldPath": "customer_id", "nativeDataType": "varchar(64)" },
+    { "fieldPath": "lifetime_value_usd", "nativeDataType": "decimal(18,2)" },
+    { "fieldPath": "customer_tier", "nativeDataType": "varchar(32)" },
+    { "fieldPath": "updated_at", "nativeDataType": "timestamp" }
   ],
-  "upstream": ["staging.customers_clean"],
-  "downstream": ["dashboard.executive_revenue", "model.churn_prediction"]
+  "upstream": ["raw.customers"],
+  "downstream": ["analytics.executive_revenue", "ml.churn_prediction_features"]
 }
