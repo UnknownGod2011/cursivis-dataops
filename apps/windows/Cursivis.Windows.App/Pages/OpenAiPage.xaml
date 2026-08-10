@@ -35,7 +35,7 @@
                         FontSize="28"
                         FontWeight="SemiBold" />
                     <TextBlock
-                        Text="Gemini reasons over live DataHub schema, ownership, descriptions, and lineage."
+                        Text="Gemini reasons over live DataHub context read through the official DataHub MCP Server."
                         Style="{StaticResource CaptionSecondaryTextStyle}"
                         TextWrapping="Wrap" />
                 </StackPanel>
@@ -85,14 +85,14 @@
                 <controls:SettingsCard IconGlyph="&#xE774;">
                     <controls:SettingsCard.Body>
                         <StackPanel Spacing="10">
-                            <TextBlock Text="DataHub" FontWeight="SemiBold" />
+                            <TextBlock Text="DataHub MCP" FontWeight="SemiBold" />
                             <TextBox
                                 x:Name="DataHubEndpointInput"
                                 AutomationProperties.AutomationId="DataHubGraphQlEndpoint"
-                                Header="GraphQL endpoint"
+                                Header="DataHub GraphQL endpoint"
                                 PlaceholderText="http://localhost:8080/api/graphql" />
                             <TextBlock
-                                Text="Local DataHub quickstart works without a token. For authenticated instances, set DATAHUB_TOKEN in the launching environment. Model and endpoint preferences are stored for the current Windows user; launch-time environment variables can override them."
+                                Text="Cursivis stores the GraphQL endpoint for setup/health checks and automatically derives the matching GMS base URL for the official DataHub MCP Server. Local quickstart needs no token. For authenticated deployments, use DATAHUB_GMS_TOKEN or DATAHUB_TOKEN."
                                 Style="{StaticResource CaptionSecondaryTextStyle}"
                                 TextWrapping="Wrap" />
                             <StackPanel Orientation="Horizontal" Spacing="8">
@@ -114,11 +114,11 @@
                     IsClosable="False"
                     IsOpen="True"
                     Severity="Informational"
-                    Title="Gemini + DataHub"
+                    Title="Gemini + DataHub MCP"
                     Message="Configure Gemini, then start DataHub and seed the demo catalog before running the grounded SQL workflow." />
 
                 <TextBlock
-                    Text="Optional inherited voice/realtime features are separate from this hackathon flow and are not required for Gemini + DataHub grounding."
+                    Text="Optional inherited voice/realtime features are separate from this hackathon flow and are not required for Gemini + DataHub MCP grounding."
                     Style="{StaticResource CaptionSecondaryTextStyle}"
                     TextWrapping="Wrap" />
             </StackPanel>
