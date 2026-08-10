@@ -114,8 +114,8 @@ public sealed partial class DataHubGeminiResponsesGateway : IResponsesGateway
         GeminiConfiguration configuration;
         try
         {
-            // Save does not use Gemini, but this preserves the same DataHub
-            // endpoint/token configuration boundary as the grounded request.
+            // Save does not call Gemini, but the same environment configuration
+            // owns the DataHub endpoint/token used by the grounded request.
             configuration = GeminiConfiguration.FromEnvironment(
                 Environment.GetEnvironmentVariable("GEMINI_MODEL")?.Trim() ?? "gemini-2.5-flash");
         }
@@ -375,7 +375,7 @@ public sealed partial class DataHubGeminiResponsesGateway : IResponsesGateway
                 "DataHub saved the document, but Cursivis could not verify its link to the grounded dataset.");
         }
 
-        return DataHubResolutionSaveResult.Succeeded(documentUrn);
+        return DataHubResolutionSaveResult.Success(documentUrn);
     }
 
     private static async Task<StructuredResponseResult> GenerateAsync(
@@ -662,11 +662,11 @@ public sealed partial class DataHubGeminiResponsesGateway : IResponsesGateway
 }
 
 public sealed record DataHubResolutionSaveResult(
-    bool Succeeded,
+    bool IsSuccess,
     string? DocumentUrn,
     string Message)
 {
-    public static DataHubResolutionSaveResult Succeeded(string documentUrn) =>
+    public static DataHubResolutionSaveResult Success(string documentUrn) =>
         new(true, documentUrn, $"Saved and verified in DataHub as {documentUrn}.");
 
     public static DataHubResolutionSaveResult Failed(string message) =>
