@@ -29,107 +29,98 @@
 
         <ScrollViewer HorizontalScrollMode="Disabled" VerticalScrollBarVisibility="Auto">
             <StackPanel MaxWidth="920" HorizontalAlignment="Stretch" Spacing="20">
-                <controls:SettingsSectionHeader x:Name="OpenAiHeader" x:Uid="OpenAiSectionHeader" />
+                <StackPanel Spacing="4">
+                    <TextBlock
+                        Text="AI &amp; DataHub"
+                        FontSize="28"
+                        FontWeight="SemiBold" />
+                    <TextBlock
+                        Text="Gemini reasons over live DataHub schema, ownership, descriptions, and lineage."
+                        Style="{StaticResource CaptionSecondaryTextStyle}"
+                        TextWrapping="Wrap" />
+                </StackPanel>
 
-                <controls:SettingsCard x:Uid="OpenAiKeyCard" IconGlyph="&#xE8D7;">
+                <controls:SettingsCard IconGlyph="&#xE8D7;">
                     <controls:SettingsCard.Body>
-                        <StackPanel Spacing="8">
+                        <StackPanel Spacing="10">
+                            <TextBlock Text="Gemini API key" FontWeight="SemiBold" />
+                            <TextBlock
+                                Text="Stored with Windows current-user protection. GEMINI_API_KEY from the launching process takes precedence for development."
+                                Style="{StaticResource CaptionSecondaryTextStyle}"
+                                TextWrapping="Wrap" />
                             <controls:SecureKeyInput
-                                x:Name="OpenAiKeyInput"
-                                AutomationProperties.AutomationId="OpenAiSecureKeyInput"
+                                x:Name="GeminiKeyInput"
+                                AutomationProperties.AutomationId="GeminiSecureKeyInput"
                                 HasSavedKey="False"
                                 IsSecureStorageAvailable="False"
                                 SaveRequested="OnSaveRequested"
                                 DeleteRequested="OnDeleteRequested"
                                 TestRequested="OnTestRequested" />
                             <HyperlinkButton
-                                x:Uid="OpenAiGetApiKeyLink"
-                                AutomationProperties.AutomationId="OpenAiGetApiKeyLink"
+                                AutomationProperties.AutomationId="GeminiGetApiKeyLink"
                                 HorizontalAlignment="Left"
-                                NavigateUri="https://platform.openai.com/api-keys" />
+                                Content="Get a Gemini API key"
+                                NavigateUri="https://aistudio.google.com/app/apikey" />
                         </StackPanel>
                     </controls:SettingsCard.Body>
                 </controls:SettingsCard>
 
-                <controls:SettingsCard x:Uid="OpenAiQualityCard" IconGlyph="&#xE945;">
+                <controls:SettingsCard IconGlyph="&#xE950;">
                     <controls:SettingsCard.Body>
-                        <StackPanel Spacing="12">
-                            <TextBlock x:Name="QualityProfileLabel" x:Uid="QualityProfileLabel" FontWeight="SemiBold" />
-                            <ComboBox
-                                x:Name="QualityProfileComboBox"
-                                x:Uid="QualityProfileComboBox"
-                                AutomationProperties.AutomationId="QualityProfile"
-                                AutomationProperties.LabeledBy="{x:Bind QualityProfileLabel}"
-                                SelectionChanged="OnQualityProfileChanged">
-                                <ComboBoxItem x:Uid="EconomyProfileOption" Tag="Economy" />
-                                <ComboBoxItem x:Uid="BalancedProfileOption" Tag="Balanced" />
-                                <ComboBoxItem x:Uid="BestQualityProfileOption" Tag="Best" />
-                            </ComboBox>
-                            <TextBlock x:Uid="QualityProfileHelp" Style="{StaticResource CaptionSecondaryTextStyle}" />
+                        <StackPanel Spacing="10">
+                            <TextBlock Text="Gemini model" FontWeight="SemiBold" />
+                            <TextBox
+                                x:Name="GeminiModelInput"
+                                AutomationProperties.AutomationId="GeminiModel"
+                                Header="Model ID"
+                                PlaceholderText="gemini-2.5-flash" />
+                            <TextBlock
+                                Text="The hackathon flow uses Gemini structured output. Keep this on a model that supports JSON-schema structured responses."
+                                Style="{StaticResource CaptionSecondaryTextStyle}"
+                                TextWrapping="Wrap" />
                         </StackPanel>
                     </controls:SettingsCard.Body>
                 </controls:SettingsCard>
 
-                <controls:SettingsCard x:Uid="OpenAiModelsCard" IconGlyph="&#xE950;">
+                <controls:SettingsCard IconGlyph="&#xE774;">
                     <controls:SettingsCard.Body>
-                        <StackPanel Spacing="12">
-                            <Expander x:Uid="AdvancedModelsExpander">
-                                <StackPanel Spacing="14">
-                                    <StackPanel Spacing="6">
-                                        <TextBlock x:Name="ResponsesModelLabel" x:Uid="ResponsesModelLabel" FontWeight="SemiBold" />
-                                        <ComboBox
-                                            x:Name="ResponsesModelComboBox"
-                                            AutomationProperties.AutomationId="ResponsesModel"
-                                            AutomationProperties.LabeledBy="{x:Bind ResponsesModelLabel}"
-                                            SelectionChanged="OnAdvancedModelChanged">
-                                            <ComboBoxItem x:Uid="LunaModelOption" Tag="gpt-5.6-luna" />
-                                            <ComboBoxItem x:Uid="TerraModelOption" Tag="gpt-5.6-terra" />
-                                            <ComboBoxItem x:Uid="SolModelOption" Tag="gpt-5.6-sol" />
-                                        </ComboBox>
-                                    </StackPanel>
-
-                                    <StackPanel Spacing="6">
-                                        <TextBlock x:Name="RealtimeModelLabel" x:Uid="RealtimeModelLabel" FontWeight="SemiBold" />
-                                        <ComboBox
-                                            x:Name="RealtimeModelComboBox"
-                                            AutomationProperties.AutomationId="RealtimeModel"
-                                            AutomationProperties.LabeledBy="{x:Bind RealtimeModelLabel}"
-                                            SelectionChanged="OnAdvancedModelChanged">
-                                            <ComboBoxItem x:Uid="RealtimeModelOption" Tag="gpt-realtime-2.1" />
-                                            <ComboBoxItem x:Uid="RealtimeMiniModelOption" Tag="gpt-realtime-2.1-mini" />
-                                        </ComboBox>
-                                    </StackPanel>
-
-                                    <StackPanel Spacing="6">
-                                        <TextBlock x:Name="TranscriptionModelLabel" x:Uid="TranscriptionModelLabel" FontWeight="SemiBold" />
-                                        <ComboBox
-                                            x:Name="TranscriptionModelComboBox"
-                                            AutomationProperties.AutomationId="TranscriptionModel"
-                                            AutomationProperties.LabeledBy="{x:Bind TranscriptionModelLabel}"
-                                            SelectionChanged="OnAdvancedModelChanged">
-                                            <ComboBoxItem x:Uid="RealtimeWhisperModelOption" Tag="gpt-realtime-whisper" />
-                                            <ComboBoxItem x:Uid="MiniTranscribeModelOption" Tag="gpt-4o-mini-transcribe" />
-                                            <ComboBoxItem x:Uid="TranscribeModelOption" Tag="gpt-4o-transcribe" />
-                                        </ComboBox>
-                                    </StackPanel>
-                                </StackPanel>
-                            </Expander>
-
-                            <HyperlinkButton
-                                x:Uid="OpenAiPricingLink"
-                                AutomationProperties.AutomationId="OpenAiPricingLink"
-                                HorizontalAlignment="Left"
-                                NavigateUri="https://developers.openai.com/api/docs/pricing" />
+                        <StackPanel Spacing="10">
+                            <TextBlock Text="DataHub" FontWeight="SemiBold" />
+                            <TextBox
+                                x:Name="DataHubEndpointInput"
+                                AutomationProperties.AutomationId="DataHubGraphQlEndpoint"
+                                Header="GraphQL endpoint"
+                                PlaceholderText="http://localhost:8080/api/graphql" />
+                            <TextBlock
+                                Text="Local DataHub quickstart works without a token. For authenticated instances, set DATAHUB_TOKEN in the launching environment."
+                                Style="{StaticResource CaptionSecondaryTextStyle}"
+                                TextWrapping="Wrap" />
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <Button
+                                    AutomationProperties.AutomationId="SaveDataOpsConfiguration"
+                                    Content="Save connection settings"
+                                    Click="OnSaveConnectionSettingsClicked" />
+                                <Button
+                                    AutomationProperties.AutomationId="TestDataHubConnection"
+                                    Content="Test DataHub"
+                                    Click="OnTestDataHubClicked" />
+                            </StackPanel>
                         </StackPanel>
                     </controls:SettingsCard.Body>
                 </controls:SettingsCard>
 
                 <InfoBar
                     x:Name="ConnectionInfo"
-                    x:Uid="OpenAiConnectionUnavailableInfo"
                     IsClosable="False"
                     IsOpen="True"
-                    Severity="Informational" />
+                    Severity="Informational"
+                    Title="Gemini + DataHub"
+                    Message="Configure Gemini, then start DataHub and seed the demo catalog before running the grounded SQL workflow." />
+
+                <TextBlock
+                    Text="Optional inherited voice/realtime features are separate from this hackathon flow and are not required for Gemini + DataHub grounding."
+                    Style="{StaticResource CaptionSecondaryTextStyle}"
+                    TextWrapping="Wrap" />
             </StackPanel>
         </ScrollViewer>
     </Grid>
