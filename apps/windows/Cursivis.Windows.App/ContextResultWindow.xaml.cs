@@ -156,7 +156,7 @@ public sealed partial class ContextResultWindow : Window
     {
         ArgumentNullException.ThrowIfNull(result);
         ArgumentNullException.ThrowIfNull(color);
-        ResetDataHubSaveButton();
+        ResetDataHubSaveButton(isEnabled: false);
         _detectedColor = color;
         _presentation = ResultPanelPresentation.FromResult(result, guidedMode: false) with
         {
@@ -172,7 +172,7 @@ public sealed partial class ContextResultWindow : Window
 
     public void ShowFailure(string heading, string message)
     {
-        ResetDataHubSaveButton();
+        ResetDataHubSaveButton(isEnabled: false);
         _detectedColor = null;
         _presentation = ResultPanelPresentation.Failure(heading, message);
         ApplyPresentation(_presentation);
@@ -181,7 +181,7 @@ public sealed partial class ContextResultWindow : Window
 
     public void ShowActionOutcome(string message, bool canUndo)
     {
-        ResetDataHubSaveButton();
+        ResetDataHubSaveButton(isEnabled: false);
         _detectedColor = null;
         _presentation = ResultPanelPresentation.ActionOutcome(message, canUndo);
         ApplyPresentation(_presentation);
