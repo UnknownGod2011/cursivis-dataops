@@ -31,8 +31,17 @@ $psi.RedirectStandardError = $true
 $psi.UseShellExecute = $false
 $psi.CreateNoWindow = $true
 $psi.Environment['DATAHUB_GMS_URL'] = $env:DATAHUB_GMS_URL.TrimEnd('/')
-if (-not [string]::IsNullOrWhiteSpace($env:DATAHUB_TOKEN)) {
+# Match the desktop runtime's token resolution exactly. DATAHUB_GMS_TOKEN is
+# the canonical MCP/GMS variable; DATAHUB_TOKEN remains a backwards-compatible
+# fallback for existing local setups. This keeps the live acceptance verifier
+# from falsely failing against an authenticated DataHub instance that the app
+# itself can reach successfully.
+if (-not [string]::IsNullOrWhiteSpace($env:DATAHUB_GMS_TOKEN)) {
+    $psi.Environment['DATAHUB_GMS_TOKEN'] = $env:DATAHUB_GMS_TOKEN.Trim()
+} elseif (-not [string]::IsNullOrWhiteSpace($env:DATAHUB_TOKEN)) {
     $psi.Environment['DATAHUB_GMS_TOKEN'] = $env:DATAHUB_TOKEN.Trim()
+} else {
+    $psi.Environment.Remove('DATAHUB_GMS_TOKEN')
 }
 # save_document is a document tool with its own feature flag in the official
 # DataHub MCP server. Keep unrelated metadata mutation tools disabled while
