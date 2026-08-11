@@ -37,15 +37,27 @@ public sealed partial class DataHubGeminiResponsesGateway : IResponsesGateway
         StructuredResponseRequest request,
         CancellationToken cancellationToken = default)
     {
+        // A displayed result must never remain write-eligible while another
+        // reasoning request is replacing its DataHub grounding. The new target
+        // is committed only after both MCP grounding and Gemini generation succeed.
+        ClearGroundingTarget();
+
         try
         {
             GeminiConfiguration configuration = GeminiConfiguration.FromEnvironment(request.Model);
-            string grounding = await GetGroundingAsync(request.UserContent, configuration, cancellationToken)
+            GroundingResult grounding = await GetGroundingAsync(request.UserContent, configuration, cancellationToken)
                 .ConfigureAwait(false);
-            return await GenerateAsync(request, configuration, grounding, cancellationToken).ConfigureAwait(false);
+            StructuredResponseResult result = await GenerateAsync(
+                request,
+                configuration,
+                grounding.Context,
+                cancellationToken).ConfigureAwait(false);
+            ApplyGroundingOutcome(result.Succeeded, grounding.DatasetUrn, grounding.DatasetName);
+            return result;
         }
         catch (GeminiGatewayException exception)
         {
+            ClearGroundingTarget();
             return StructuredResponseResult.Failed(exception.Failure);
         }
         catch (DataHubMcpException exception)
@@ -58,6 +70,7 @@ public sealed partial class DataHubGeminiResponsesGateway : IResponsesGateway
         }
         catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
         {
+            ClearGroundingTarget();
             return StructuredResponseResult.Failed(new OpenAiFailure(
                 OpenAiFailureKind.Timeout,
                 "The Gemini or DataHub MCP request timed out.",
@@ -65,6 +78,7 @@ public sealed partial class DataHubGeminiResponsesGateway : IResponsesGateway
         }
         catch (HttpRequestException)
         {
+            ClearGroundingTarget();
             return StructuredResponseResult.Failed(new OpenAiFailure(
                 OpenAiFailureKind.Network,
                 "Cursivis could not reach Gemini.",
@@ -72,6 +86,7 @@ public sealed partial class DataHubGeminiResponsesGateway : IResponsesGateway
         }
         catch (JsonException)
         {
+            ClearGroundingTarget();
             return StructuredResponseResult.Failed(new OpenAiFailure(
                 OpenAiFailureKind.MalformedResponse,
                 "Gemini or DataHub MCP returned malformed structured data.",
@@ -214,7 +229,7 @@ public sealed partial class DataHubGeminiResponsesGateway : IResponsesGateway
         }
     }
 
-    private async Task<string> GetGroundingAsync(
+    private async Task<GroundingResult> GetGroundingAsync(
         string selectedText,
         GeminiConfiguration configuration,
         CancellationToken cancellationToken)
@@ -222,12 +237,10 @@ public sealed partial class DataHubGeminiResponsesGateway : IResponsesGateway
         string? dataset = ExtractDatasetReferences(selectedText).FirstOrDefault();
         if (string.IsNullOrWhiteSpace(dataset))
         {
-            ClearGroundingTarget();
-            return string.Empty;
+            return GroundingResult.Empty;
         }
         if (string.IsNullOrWhiteSpace(configuration.DataHubGmsUrl))
         {
-            ClearGroundingTarget();
             throw new GeminiGatewayException(new OpenAiFailure(
                 OpenAiFailureKind.Network,
                 "DataHub MCP context unavailable — configure DATAHUB_GMS_URL for grounded data work.",
@@ -260,7 +273,6 @@ public sealed partial class DataHubGeminiResponsesGateway : IResponsesGateway
         }
         if (string.IsNullOrWhiteSpace(urn))
         {
-            ClearGroundingTarget();
             throw new GeminiGatewayException(new OpenAiFailure(
                 OpenAiFailureKind.ModelUnavailable,
                 "DataHub MCP found no dataset matching the selected SQL; Cursivis will not fabricate grounding.",
@@ -295,17 +307,10 @@ public sealed partial class DataHubGeminiResponsesGateway : IResponsesGateway
         if (!entityText.Contains(dataset, StringComparison.OrdinalIgnoreCase) &&
             !entityText.Contains(terminalName, StringComparison.OrdinalIgnoreCase))
         {
-            ClearGroundingTarget();
             throw new GeminiGatewayException(new OpenAiFailure(
                 OpenAiFailureKind.ModelUnavailable,
                 "DataHub MCP search did not resolve the selected dataset confidently; Cursivis will not fabricate grounding.",
                 false));
-        }
-
-        lock (_groundingGate)
-        {
-            _lastGroundedDatasetUrn = urn;
-            _lastGroundedDatasetName = dataset;
         }
 
         string combined = JsonSerializer.Serialize(new
@@ -319,7 +324,10 @@ public sealed partial class DataHubGeminiResponsesGateway : IResponsesGateway
             upstreamLineage = Limit(upstreamText, 4_000),
             downstreamLineage = Limit(downstreamText, 4_000),
         });
-        return Limit(combined, MaximumGroundingCharacters);
+        return new GroundingResult(
+            Limit(combined, MaximumGroundingCharacters),
+            urn,
+            dataset);
     }
 
     private static void RequireTools(DataHubMcpClient mcp, params string[] names)
@@ -476,6 +484,21 @@ public sealed partial class DataHubGeminiResponsesGateway : IResponsesGateway
         return references;
     }
 
+    internal void ApplyGroundingOutcome(bool succeeded, string? datasetUrn, string? datasetName)
+    {
+        if (!succeeded || string.IsNullOrWhiteSpace(datasetUrn))
+        {
+            ClearGroundingTarget();
+            return;
+        }
+
+        lock (_groundingGate)
+        {
+            _lastGroundedDatasetUrn = datasetUrn;
+            _lastGroundedDatasetName = datasetName;
+        }
+    }
+
     private void ClearGroundingTarget()
     {
         lock (_groundingGate)
@@ -495,6 +518,11 @@ public sealed partial class DataHubGeminiResponsesGateway : IResponsesGateway
 
     [GeneratedRegex("urn:li:document:[A-Za-z0-9._:-]+", RegexOptions.CultureInvariant)]
     private static partial Regex DocumentUrnRegex();
+
+    private sealed record GroundingResult(string Context, string? DatasetUrn, string? DatasetName)
+    {
+        public static GroundingResult Empty { get; } = new(string.Empty, null, null);
+    }
 
     private sealed record GeminiConfiguration(
         IReadOnlyList<string> ApiKeys,
