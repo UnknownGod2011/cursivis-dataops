@@ -5,6 +5,11 @@ $ErrorActionPreference = 'Stop'
 $root = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
 $venv = Join-Path $root '.tools\datahub-venv'
 
+# Keep the judge-facing OSS/Core stack deterministic. This pinned stable CLI
+# release drives `datahub docker quickstart` and is new enough for the official
+# MCP save_document tool, which requires DataHub OSS >= 1.4.0.
+$dataHubCliVersion = '1.6.0.15'
+
 if (-not (Get-Command docker -ErrorAction SilentlyContinue)) { throw 'Docker Desktop is required. Install and start Docker, then rerun this script.' }
 docker info *> $null
 if ($LASTEXITCODE -ne 0) { throw 'Docker is installed but not running. Start Docker Desktop, then rerun this script.' }
@@ -21,9 +26,15 @@ if (-not (Test-Path $venv)) { python -m venv $venv }
 $venvPython = Join-Path $venv 'Scripts\python.exe'
 $cli = Join-Path $venv 'Scripts\datahub.exe'
 $uvx = Join-Path $venv 'Scripts\uvx.exe'
-& $venvPython -m pip install --upgrade pip acryl-datahub uv
-if ($LASTEXITCODE -ne 0) { throw 'Unable to install the DataHub CLI and MCP launcher dependencies.' }
+& $venvPython -m pip install --upgrade pip "acryl-datahub==$dataHubCliVersion" uv
+if ($LASTEXITCODE -ne 0) { throw 'Unable to install the pinned DataHub CLI and MCP launcher dependencies.' }
 if (-not (Test-Path $uvx)) { throw 'uvx was not installed; the DataHub MCP Server cannot be launched.' }
+
+$installedDataHubVersion = & $venvPython -c "from importlib.metadata import version; print(version('acryl-datahub'))"
+if ($LASTEXITCODE -ne 0 -or $installedDataHubVersion.Trim() -ne $dataHubCliVersion) {
+    throw "Expected acryl-datahub $dataHubCliVersion but found '$($installedDataHubVersion.Trim())'. Refusing a non-reproducible judge stack."
+}
+Write-Host "Pinned DataHub OSS/Core CLI: acryl-datahub $dataHubCliVersion"
 
 & $cli docker quickstart
 if ($LASTEXITCODE -ne 0) { throw 'DataHub quickstart failed. Review Docker Desktop resources and try again.' }
