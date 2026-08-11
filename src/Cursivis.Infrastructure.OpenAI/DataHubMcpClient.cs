@@ -13,6 +13,7 @@ internal sealed class DataHubMcpClient : IAsyncDisposable
 {
     private const string ProtocolVersion = "2025-06-18";
     internal const string DefaultPackage = "mcp-server-datahub@0.6.0";
+    internal static readonly TimeSpan RequestTimeout = TimeSpan.FromSeconds(60);
     private readonly Process _process;
     private readonly StreamWriter _stdin;
     private readonly StreamReader _stdout;
@@ -182,7 +183,11 @@ internal sealed class DataHubMcpClient : IAsyncDisposable
 
     private async Task<JsonElement> SendRequestAsync(string method, object parameters, CancellationToken cancellationToken)
     {
-        await _rpcGate.WaitAsync(cancellationToken).ConfigureAwait(false);
+        using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        timeout.CancelAfter(RequestTimeout);
+        CancellationToken requestToken = timeout.Token;
+
+        await _rpcGate.WaitAsync(requestToken).ConfigureAwait(false);
         try
         {
             ThrowIfStopped();
@@ -194,12 +199,12 @@ internal sealed class DataHubMcpClient : IAsyncDisposable
                 method,
                 @params = parameters,
             });
-            await _stdin.WriteLineAsync(request.AsMemory(), cancellationToken).ConfigureAwait(false);
-            await _stdin.FlushAsync(cancellationToken).ConfigureAwait(false);
+            await _stdin.WriteLineAsync(request.AsMemory(), requestToken).ConfigureAwait(false);
+            await _stdin.FlushAsync(requestToken).ConfigureAwait(false);
 
             while (true)
             {
-                string? line = await _stdout.ReadLineAsync(cancellationToken).ConfigureAwait(false);
+                string? line = await _stdout.ReadLineAsync(requestToken).ConfigureAwait(false);
                 if (line is null)
                 {
                     ThrowIfStopped();
@@ -250,7 +255,11 @@ internal sealed class DataHubMcpClient : IAsyncDisposable
 
     private async Task SendNotificationAsync(string method, object parameters, CancellationToken cancellationToken)
     {
-        await _rpcGate.WaitAsync(cancellationToken).ConfigureAwait(false);
+        using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        timeout.CancelAfter(RequestTimeout);
+        CancellationToken requestToken = timeout.Token;
+
+        await _rpcGate.WaitAsync(requestToken).ConfigureAwait(false);
         try
         {
             ThrowIfStopped();
@@ -260,8 +269,8 @@ internal sealed class DataHubMcpClient : IAsyncDisposable
                 method,
                 @params = parameters,
             });
-            await _stdin.WriteLineAsync(request.AsMemory(), cancellationToken).ConfigureAwait(false);
-            await _stdin.FlushAsync(cancellationToken).ConfigureAwait(false);
+            await _stdin.WriteLineAsync(request.AsMemory(), requestToken).ConfigureAwait(false);
+            await _stdin.FlushAsync(requestToken).ConfigureAwait(false);
         }
         finally
         {
