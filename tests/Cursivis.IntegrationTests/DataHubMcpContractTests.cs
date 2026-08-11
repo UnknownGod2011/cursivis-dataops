@@ -40,6 +40,12 @@ public sealed class DataHubMcpContractTests
     }
 
     [Fact]
+    public void McpRuntimeBoundsEveryRequest()
+    {
+        Assert.Equal(TimeSpan.FromSeconds(60), DataHubMcpClient.RequestTimeout);
+    }
+
+    [Fact]
     public void McpToolResultPrefersStructuredContent()
     {
         using JsonDocument document = JsonDocument.Parse("""
