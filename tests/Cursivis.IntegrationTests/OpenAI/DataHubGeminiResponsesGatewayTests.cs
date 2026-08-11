@@ -60,18 +60,39 @@ public sealed class DataHubGeminiResponsesGatewayTests
     }
 
     [Fact]
-    public void GroundedWritebackEligibility_ExistsOnlyAfterSuccessfulGroundedGeneration()
+    public void GetEligibleWritebackContent_ExtractsExactSmartResultContentOnly()
+    {
+        const string smartResult = """
+            {"schemaVersion":1,"finalContent":"Reviewed correction\nwith exact spacing"}
+            """;
+        const string guidedOptions = """
+            {"schemaVersion":1,"options":[{"id":"explain","label":"Explain","instruction":"Explain it"}]}
+            """;
+
+        Assert.Equal(
+            "Reviewed correction\nwith exact spacing",
+            DataHubGeminiResponsesGateway.GetEligibleWritebackContent(smartResult));
+        Assert.Null(DataHubGeminiResponsesGateway.GetEligibleWritebackContent(guidedOptions));
+        Assert.Null(DataHubGeminiResponsesGateway.GetEligibleWritebackContent("not json"));
+    }
+
+    [Fact]
+    public void GroundedWritebackEligibility_ExistsOnlyAfterSuccessfulGroundedSmartResult()
     {
         var gateway = new DataHubGeminiResponsesGateway();
         const string datasetUrn = "urn:li:dataset:(urn:li:dataPlatform:demo,analytics.customers,PROD)";
+        const string reviewed = "Reviewed correction";
 
-        gateway.ApplyGroundingOutcome(true, datasetUrn, "analytics.customers");
+        gateway.ApplyGroundingOutcome(true, datasetUrn, "analytics.customers", reviewed);
         Assert.True(gateway.HasGroundedDataset);
 
-        gateway.ApplyGroundingOutcome(false, datasetUrn, "analytics.customers");
+        gateway.ApplyGroundingOutcome(false, datasetUrn, "analytics.customers", reviewed);
         Assert.False(gateway.HasGroundedDataset);
 
-        gateway.ApplyGroundingOutcome(true, null, "analytics.customers");
+        gateway.ApplyGroundingOutcome(true, null, "analytics.customers", reviewed);
+        Assert.False(gateway.HasGroundedDataset);
+
+        gateway.ApplyGroundingOutcome(true, datasetUrn, "analytics.customers", null);
         Assert.False(gateway.HasGroundedDataset);
     }
 
@@ -111,5 +132,23 @@ public sealed class DataHubGeminiResponsesGatewayTests
         Assert.False(result.IsSuccess);
         Assert.Null(result.DocumentUrn);
         Assert.Contains("grounded dataset", result.Message, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public async Task SaveResolutionAsync_RejectsStaleResultBeforeAnyMutation()
+    {
+        var gateway = new DataHubGeminiResponsesGateway();
+        const string datasetUrn = "urn:li:dataset:(urn:li:dataPlatform:demo,analytics.customers,PROD)";
+        gateway.ApplyGroundingOutcome(
+            true,
+            datasetUrn,
+            "analytics.customers",
+            "Newest grounded result");
+
+        DataHubResolutionSaveResult result = await gateway.SaveResolutionAsync("Older displayed result");
+
+        Assert.False(result.IsSuccess);
+        Assert.Null(result.DocumentUrn);
+        Assert.Contains("no longer the exact Gemini result", result.Message, StringComparison.OrdinalIgnoreCase);
     }
 }
