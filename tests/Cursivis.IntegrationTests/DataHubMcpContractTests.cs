@@ -34,6 +34,56 @@ public sealed class DataHubMcpContractTests
     }
 
     [Fact]
+    public void ExactDatasetResolutionIgnoresFirstSameNamedWrongNamespace()
+    {
+        const string wrong = "urn:li:dataset:(urn:li:dataPlatform:demo,staging.customers,PROD)";
+        const string expected = "urn:li:dataset:(urn:li:dataPlatform:demo,analytics.customers,PROD)";
+        string searchText = JsonSerializer.Serialize(new
+        {
+            results = new[]
+            {
+                new { urn = wrong, name = "staging.customers" },
+                new { urn = expected, name = "analytics.customers" },
+            },
+        });
+
+        string? resolved = DataHubGeminiResponsesGateway.FindExactDatasetUrn(searchText, "analytics.customers");
+
+        Assert.Equal(expected, resolved);
+    }
+
+    [Fact]
+    public void ExactDatasetResolutionReturnsNullWhenOnlyWrongNamespaceExists()
+    {
+        const string wrong = "urn:li:dataset:(urn:li:dataPlatform:demo,staging.customers,PROD)";
+        string searchText = JsonSerializer.Serialize(new { results = new[] { new { urn = wrong } } });
+
+        string? resolved = DataHubGeminiResponsesGateway.FindExactDatasetUrn(searchText, "analytics.customers");
+
+        Assert.Null(resolved);
+    }
+
+    [Fact]
+    public void ExactDatasetResolutionRejectsAmbiguousExactUrns()
+    {
+        const string first = "urn:li:dataset:(urn:li:dataPlatform:demo,analytics.customers,PROD)";
+        const string second = "urn:li:dataset:(urn:li:dataPlatform:snowflake,analytics.customers,PROD)";
+        string searchText = JsonSerializer.Serialize(new
+        {
+            results = new[]
+            {
+                new { urn = first },
+                new { urn = second },
+            },
+        });
+
+        DataHubMcpException exception = Assert.Throws<DataHubMcpException>(() =>
+            DataHubGeminiResponsesGateway.FindExactDatasetUrn(searchText, "analytics.customers"));
+
+        Assert.Contains("multiple exact URNs", exception.Message, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
     public void McpRuntimeDefaultsToPinnedOfficialRelease()
     {
         Assert.Equal("mcp-server-datahub@0.6.0", DataHubMcpClient.DefaultPackage);
