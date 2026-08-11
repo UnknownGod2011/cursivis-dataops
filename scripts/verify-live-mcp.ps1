@@ -1,5 +1,7 @@
 [CmdletBinding()]
-param()
+param(
+    [switch]$ConfirmWriteback
+)
 
 $ErrorActionPreference = 'Stop'
 $root = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
@@ -150,8 +152,7 @@ try {
     }
 
     # Validate the exact live MCP contracts used by the desktop golden flow.
-    # This is intentionally non-mutating: tools/list exposes schemas and MCP
-    # safety annotations, so API drift is caught before a judge reaches Save.
+    # This is intentionally non-mutating unless -ConfirmWriteback is supplied.
     Assert-McpToolArguments -ToolsByName $toolsByName -Name 'search' -Arguments @('query', 'num_results', 'offset')
     Assert-McpToolArguments -ToolsByName $toolsByName -Name 'get_entities' -Arguments @('urns')
     Assert-McpToolArguments -ToolsByName $toolsByName -Name 'list_schema_fields' -Arguments @('urn', 'limit', 'offset')
@@ -205,7 +206,43 @@ try {
     Write-Host "Resolved dataset: $urn"
     Write-Host 'Verified MCP context: deterministic owner, schema, raw.customers upstream, and both downstream blast-radius assets.'
     Write-Host 'Verified live MCP schemas and read/write safety annotations for search, get_entities, list_schema_fields, get_lineage, and save_document.'
-    Write-Host 'save_document is exposed for the confirmation-gated app flow; preflight itself performs no mutation.'
+
+    if ($ConfirmWriteback) {
+        # Supplying -ConfirmWriteback is an explicit human confirmation. The default
+        # preflight remains read-only so setup and CI can never mutate DataHub.
+        $marker = 'CURSIVIS-MCP-WRITEBACK-' + [Guid]::NewGuid().ToString('N')
+        $title = "Cursivis MCP acceptance proof - $marker"
+        $content = "Confirmed Cursivis DataOps MCP write-back proof. Marker: $marker"
+        Write-Host 'Explicit -ConfirmWriteback received; performing one durable DataHub MCP save_document mutation.' -ForegroundColor Yellow
+
+        $saved = Invoke-McpTool -Name 'save_document' -Arguments @{
+            document_type = 'Decision'
+            title = $title
+            content = $content
+            related_assets = @($urn)
+        }
+        $savedJson = $saved | ConvertTo-Json -Depth 50 -Compress
+        $documentMatch = [regex]::Match($savedJson, 'urn:li:document:[A-Za-z0-9._:-]+')
+        if (-not $documentMatch.Success) {
+            throw 'DataHub MCP save_document returned no document URN; durable write-back cannot be proven.'
+        }
+        $documentUrn = $documentMatch.Value
+
+        $verifiedDocument = Invoke-McpTool -Name 'get_entities' -Arguments @{ urns = $documentUrn }
+        $verifiedJson = $verifiedDocument | ConvertTo-Json -Depth 50 -Compress
+        foreach ($expected in @($documentUrn, $title, $marker, $urn)) {
+            if ($verifiedJson -notmatch [regex]::Escape($expected)) {
+                throw "DataHub MCP read-after-write did not return expected persisted value '$expected'."
+            }
+        }
+
+        Write-Host 'Confirmed DataHub MCP write-back passed read-after-write verification.' -ForegroundColor Green
+        Write-Host "Saved document: $documentUrn"
+        Write-Host 'Verified persisted title/content marker and related analytics.customers asset through MCP get_entities.'
+    } else {
+        Write-Host 'save_document is exposed for the confirmation-gated app flow; preflight itself performed no mutation.'
+        Write-Host 'Optional live write proof: rerun with -ConfirmWriteback only when you intentionally want to create a verification document.'
+    }
 }
 finally {
     try { $process.StandardInput.Close() } catch {}
