@@ -135,6 +135,13 @@ public sealed partial class DataHubGeminiResponsesGateway : IResponsesGateway
             return DataHubResolutionSaveResult.Failed("There is no reviewed resolution to save.");
         }
 
+        string reviewed = resolutionText.Trim();
+        if (reviewed.Length > MaximumResolutionCharacters)
+        {
+            return DataHubResolutionSaveResult.Failed(
+                $"The reviewed resolution is too large to save exactly through DataHub MCP ({reviewed.Length:N0} characters; maximum {MaximumResolutionCharacters:N0}). Cursivis will not truncate confirmed content.");
+        }
+
         string? datasetUrn;
         string? datasetName;
         lock (_groundingGate)
@@ -165,11 +172,6 @@ public sealed partial class DataHubGeminiResponsesGateway : IResponsesGateway
                 "DataHub MCP is unavailable — configure DATAHUB_GMS_URL before saving a resolution.");
         }
 
-        string trimmed = resolutionText.Trim();
-        if (trimmed.Length > MaximumResolutionCharacters)
-        {
-            trimmed = trimmed[..MaximumResolutionCharacters];
-        }
         string title = $"Cursivis resolution — {datasetName ?? "DataHub dataset"}";
 
         try
@@ -187,7 +189,7 @@ public sealed partial class DataHubGeminiResponsesGateway : IResponsesGateway
                 {
                     document_type = "Decision",
                     title,
-                    content = trimmed,
+                    content = reviewed,
                     related_assets = new[] { datasetUrn },
                 },
                 cancellationToken).ConfigureAwait(false);
@@ -206,7 +208,7 @@ public sealed partial class DataHubGeminiResponsesGateway : IResponsesGateway
             string verified = DataHubMcpClient.GetToolResultText(verifyResult);
             if (!ContainsPersistedValue(verified, documentUrn) ||
                 !ContainsPersistedValue(verified, title) ||
-                !ContainsPersistedValue(verified, trimmed) ||
+                !ContainsPersistedValue(verified, reviewed) ||
                 !ContainsPersistedValue(verified, datasetUrn))
             {
                 return DataHubResolutionSaveResult.Failed(
