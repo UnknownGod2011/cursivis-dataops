@@ -88,6 +88,20 @@ public sealed class DataHubGeminiResponsesGatewayTests
     }
 
     [Fact]
+    public async Task SaveResolutionAsync_RejectsOversizedResolutionBeforeAnyMutation()
+    {
+        var gateway = new DataHubGeminiResponsesGateway();
+        string oversized = new('x', 24_001);
+
+        DataHubResolutionSaveResult result = await gateway.SaveResolutionAsync(oversized);
+
+        Assert.False(result.IsSuccess);
+        Assert.Null(result.DocumentUrn);
+        Assert.Contains("too large", result.Message, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("will not truncate", result.Message, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
     public async Task SaveResolutionAsync_RejectsWriteWithoutGroundedDataset()
     {
         var gateway = new DataHubGeminiResponsesGateway();
