@@ -275,7 +275,7 @@ public sealed partial class DataHubGeminiResponsesGateway : IResponsesGateway
             new { query = searchQuery, num_results = 5, offset = 0 },
             cancellationToken).ConfigureAwait(false);
         string searchText = DataHubMcpClient.GetToolResultText(searchResult);
-        string? urn = FindFirstDatasetUrn(searchText);
+        string? urn = FindExactDatasetUrn(searchText, dataset);
         if (string.IsNullOrWhiteSpace(urn))
         {
             string shortName = dataset.Split('.').Last();
@@ -284,13 +284,13 @@ public sealed partial class DataHubGeminiResponsesGateway : IResponsesGateway
                 new { query = "/q " + shortName, num_results = 10, offset = 0 },
                 cancellationToken).ConfigureAwait(false);
             searchText = DataHubMcpClient.GetToolResultText(searchResult);
-            urn = FindFirstDatasetUrn(searchText);
+            urn = FindExactDatasetUrn(searchText, dataset);
         }
         if (string.IsNullOrWhiteSpace(urn))
         {
             throw new GeminiGatewayException(new OpenAiFailure(
                 OpenAiFailureKind.ModelUnavailable,
-                "DataHub MCP found no dataset matching the selected SQL; Cursivis will not fabricate grounding.",
+                $"DataHub MCP found no exact dataset identity for '{dataset}'; Cursivis will not ground against a same-named asset from another namespace.",
                 false));
         }
 
@@ -316,15 +316,17 @@ public sealed partial class DataHubGeminiResponsesGateway : IResponsesGateway
         string upstreamText = DataHubMcpClient.GetToolResultText(upstreamResult);
         string downstreamText = DataHubMcpClient.GetToolResultText(downstreamResult);
 
-        // Guard against a coincidental broad-search match. The canonical name or
-        // its terminal segment must be represented in the retrieved entity.
-        string terminalName = dataset.Split('.').Last();
-        if (!entityText.Contains(dataset, StringComparison.OrdinalIgnoreCase) &&
-            !entityText.Contains(terminalName, StringComparison.OrdinalIgnoreCase))
+        // MCP search is only discovery. Before any schema/lineage evidence is sent
+        // to Gemini, the entity read itself must prove the exact selected dataset
+        // identity and the exact URN chosen from search. This keeps the executable
+        // golden path aligned with the live acceptance verifier and fails closed on
+        // namespace/platform ambiguity.
+        if (!entityText.Contains(dataset, StringComparison.OrdinalIgnoreCase) ||
+            !entityText.Contains(urn, StringComparison.Ordinal))
         {
             throw new GeminiGatewayException(new OpenAiFailure(
                 OpenAiFailureKind.ModelUnavailable,
-                "DataHub MCP search did not resolve the selected dataset confidently; Cursivis will not fabricate grounding.",
+                "DataHub MCP entity verification did not return the exact selected dataset and resolved URN; Cursivis will not fabricate grounding.",
                 false));
         }
 
@@ -372,10 +374,28 @@ public sealed partial class DataHubGeminiResponsesGateway : IResponsesGateway
             verifiedText.Contains(encoded[1..^1], StringComparison.Ordinal);
     }
 
-    private static string? FindFirstDatasetUrn(string text)
+    internal static string? FindExactDatasetUrn(string text, string qualifiedDatasetName)
     {
-        Match match = DatasetUrnRegex().Match(text);
-        return match.Success ? match.Value : null;
+        if (string.IsNullOrWhiteSpace(text) || string.IsNullOrWhiteSpace(qualifiedDatasetName))
+        {
+            return null;
+        }
+
+        string identityNeedle = "," + qualifiedDatasetName.Trim() + ",";
+        string[] matches = DatasetUrnRegex()
+            .Matches(text)
+            .Select(static match => match.Value)
+            .Where(urn => urn.IndexOf(identityNeedle, StringComparison.OrdinalIgnoreCase) >= 0)
+            .Distinct(StringComparer.Ordinal)
+            .ToArray();
+
+        return matches.Length switch
+        {
+            0 => null,
+            1 => matches[0],
+            _ => throw new DataHubMcpException(
+                $"DataHub MCP search returned multiple exact URNs for '{qualifiedDatasetName}'. Refusing ambiguous runtime grounding."),
+        };
     }
 
     private static string? FindFirstDocumentUrn(string text)
