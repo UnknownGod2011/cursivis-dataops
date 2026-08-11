@@ -80,6 +80,28 @@ public sealed class DataHubMcpContractTests
     }
 
     [Fact]
+    public void PersistenceVerificationRecognizesJsonEscapedReviewedContentAndAsset()
+    {
+        const string documentUrn = "urn:li:document:cursivis-test";
+        const string title = "Cursivis resolution — analytics.customers";
+        const string content = "Line one\nLine two with \"quoted\" evidence";
+        const string datasetUrn = "urn:li:dataset:(urn:li:dataPlatform:demo,analytics.customers,PROD)";
+        string verified = JsonSerializer.Serialize(new
+        {
+            urn = documentUrn,
+            title,
+            contents = new { text = content },
+            relatedAssets = new[] { datasetUrn },
+        });
+
+        Assert.True(DataHubGeminiResponsesGateway.ContainsPersistedValue(verified, documentUrn));
+        Assert.True(DataHubGeminiResponsesGateway.ContainsPersistedValue(verified, title));
+        Assert.True(DataHubGeminiResponsesGateway.ContainsPersistedValue(verified, content));
+        Assert.True(DataHubGeminiResponsesGateway.ContainsPersistedValue(verified, datasetUrn));
+        Assert.False(DataHubGeminiResponsesGateway.ContainsPersistedValue(verified, "different reviewed content"));
+    }
+
+    [Fact]
     public async Task SaveResolutionRequiresGroundedDatasetBeforeAnyMutation()
     {
         var gateway = new DataHubGeminiResponsesGateway();
