@@ -6,6 +6,7 @@ param(
 $ErrorActionPreference = 'Stop'
 $root = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
 $mcpRequestTimeout = [TimeSpan]::FromSeconds(60)
+$canonicalDatasetName = 'analytics.customers'
 
 if ([string]::IsNullOrWhiteSpace($env:DATAHUB_GMS_URL)) {
     $env:DATAHUB_GMS_URL = 'http://localhost:8080'
@@ -121,6 +122,30 @@ function Assert-McpToolReadOnlyHint {
     }
 }
 
+function Get-ExactDatasetUrn {
+    param(
+        [string]$SearchJson,
+        [string]$QualifiedDatasetName
+    )
+
+    $matches = [regex]::Matches($SearchJson, 'urn:li:dataset:\([^\r\n"'']+\)')
+    $identityNeedle = ',' + $QualifiedDatasetName + ','
+    $exact = @(
+        $matches |
+            ForEach-Object { $_.Value } |
+            Where-Object { $_.IndexOf($identityNeedle, [StringComparison]::OrdinalIgnoreCase) -ge 0 } |
+            Select-Object -Unique
+    )
+
+    if ($exact.Count -eq 0) {
+        throw "DataHub MCP search returned no exact URN for '$QualifiedDatasetName'. Refusing to accept a same-named dataset from another namespace."
+    }
+    if ($exact.Count -gt 1) {
+        throw "DataHub MCP search returned multiple exact URNs for '$QualifiedDatasetName'. Refusing ambiguous golden-flow grounding."
+    }
+    return $exact[0]
+}
+
 try {
     $initialize = Invoke-McpRequest -Method 'initialize' -Params @{
         protocolVersion = '2025-06-18'
@@ -165,16 +190,13 @@ try {
 
     $search = Invoke-McpTool -Name 'search' -Arguments @{ query = '/q analytics+customers'; num_results = 5; offset = 0 }
     $searchJson = $search | ConvertTo-Json -Depth 50 -Compress
-    $urnMatch = [regex]::Match($searchJson, 'urn:li:dataset:[^"\\]+')
-    if (-not $urnMatch.Success) {
-        throw 'DataHub MCP search could not resolve the deterministic analytics.customers dataset.'
-    }
-    $urn = $urnMatch.Value
+    $urn = Get-ExactDatasetUrn -SearchJson $searchJson -QualifiedDatasetName $canonicalDatasetName
 
     $entity = Invoke-McpTool -Name 'get_entities' -Arguments @{ urns = $urn }
     $entityJson = $entity | ConvertTo-Json -Depth 50 -Compress
-    if ($entityJson -notmatch '(?i)analytics\.customers|customers') {
-        throw 'DataHub MCP entity read did not confidently match analytics.customers.'
+    if ($entityJson.IndexOf($canonicalDatasetName, [StringComparison]::OrdinalIgnoreCase) -lt 0 -or
+        $entityJson.IndexOf($urn, [StringComparison]::Ordinal) -lt 0) {
+        throw "DataHub MCP entity read did not return the exact canonical dataset '$canonicalDatasetName' and resolved URN."
     }
     if ($entityJson -notmatch [regex]::Escape('urn:li:corpuser:datahub')) {
         throw 'DataHub MCP entity read is missing the deterministic owner urn:li:corpuser:datahub.'
@@ -203,8 +225,8 @@ try {
     }
 
     Write-Host 'Live DataHub MCP preflight passed.' -ForegroundColor Green
-    Write-Host "Resolved dataset: $urn"
-    Write-Host 'Verified MCP context: deterministic owner, schema, raw.customers upstream, and both downstream blast-radius assets.'
+    Write-Host "Resolved exact dataset: $urn"
+    Write-Host 'Verified MCP context: exact analytics.customers identity, deterministic owner, schema, raw.customers upstream, and both downstream blast-radius assets.'
     Write-Host 'Verified live MCP schemas and read/write safety annotations for search, get_entities, list_schema_fields, get_lineage, and save_document.'
 
     if ($ConfirmWriteback) {
@@ -238,7 +260,7 @@ try {
 
         Write-Host 'Confirmed DataHub MCP write-back passed read-after-write verification.' -ForegroundColor Green
         Write-Host "Saved document: $documentUrn"
-        Write-Host 'Verified persisted title/content marker and related analytics.customers asset through MCP get_entities.'
+        Write-Host "Verified persisted title/content marker and related exact $canonicalDatasetName asset through MCP get_entities."
     } else {
         Write-Host 'save_document is exposed for the confirmation-gated app flow; preflight itself performed no mutation.'
         Write-Host 'Optional live write proof: rerun with -ConfirmWriteback only when you intentionally want to create a verification document.'
