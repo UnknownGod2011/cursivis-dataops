@@ -108,6 +108,9 @@ try {
     if ($entityJson -notmatch '(?i)analytics\.customers|customers') {
         throw 'DataHub MCP entity read did not confidently match analytics.customers.'
     }
+    if ($entityJson -notmatch [regex]::Escape('urn:li:corpuser:datahub')) {
+        throw 'DataHub MCP entity read is missing the deterministic owner urn:li:corpuser:datahub.'
+    }
 
     $schema = Invoke-McpTool -Name 'list_schema_fields' -Arguments @{ urn = $urn; limit = 100; offset = 0 }
     $schemaJson = $schema | ConvertTo-Json -Depth 50 -Compress
@@ -117,7 +120,12 @@ try {
         }
     }
 
-    $null = Invoke-McpTool -Name 'get_lineage' -Arguments @{ urn = $urn; upstream = $true; max_hops = 3; max_results = 20; offset = 0 }
+    $upstream = Invoke-McpTool -Name 'get_lineage' -Arguments @{ urn = $urn; upstream = $true; max_hops = 3; max_results = 20; offset = 0 }
+    $upstreamJson = $upstream | ConvertTo-Json -Depth 50 -Compress
+    if ($upstreamJson -notmatch [regex]::Escape('raw.customers')) {
+        throw "DataHub MCP upstream lineage is missing expected source 'raw.customers'."
+    }
+
     $downstream = Invoke-McpTool -Name 'get_lineage' -Arguments @{ urn = $urn; upstream = $false; max_hops = 3; max_results = 20; offset = 0 }
     $downstreamJson = $downstream | ConvertTo-Json -Depth 50 -Compress
     foreach ($asset in @('executive_revenue', 'churn_prediction_features')) {
@@ -128,6 +136,7 @@ try {
 
     Write-Host 'Live DataHub MCP preflight passed.' -ForegroundColor Green
     Write-Host "Resolved dataset: $urn"
+    Write-Host 'Verified MCP context: deterministic owner, schema, raw.customers upstream, and both downstream blast-radius assets.'
     Write-Host 'Verified runtime tools: search, get_entities, list_schema_fields, get_lineage; save_document is exposed for the confirmation-gated app flow.'
 }
 finally {
