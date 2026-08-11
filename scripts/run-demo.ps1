@@ -64,3 +64,4 @@ Write-Host 'Cursivis DataOps launched with a verified local DataHub catalog and 
 Write-Host "Pinned MCP package: $($env:DATAHUB_MCP_PACKAGE)"
 Write-Host 'Golden demo: select examples\broken-query.sql and invoke the configured context hotkey.'
 Write-Host 'Grounding uses DataHub MCP search/get_entities/list_schema_fields/get_lineage; confirmed Save to DataHub uses MCP save_document + read-after-write.'
+Write-Host 'For an additional deliberate live MCP persistence proof, run .\scripts\verify-live-mcp.ps1 -ConfirmWriteback; without that switch the verifier never mutates DataHub.'
