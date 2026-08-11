@@ -22,7 +22,7 @@ public sealed partial class ContextResultWindow
             return;
         }
 
-        string reviewedContent = _presentation.Content?.Trim() ?? string.Empty;
+        string reviewedContent = _presentation.Content ?? string.Empty;
         if (string.IsNullOrWhiteSpace(reviewedContent))
         {
             ResetDataHubSaveButton();
@@ -79,7 +79,7 @@ public sealed partial class ContextResultWindow
 
         try
         {
-            DataHubResolutionSaveResult result = await gateway.SaveResolutionAsync(reviewedContent);
+            DataHubResolutionSaveResult result = await gateway.SaveConfirmedResolutionAsync(reviewedContent);
             if (result.IsSuccess)
             {
                 SaveToDataHubButton.Content = "Saved";
