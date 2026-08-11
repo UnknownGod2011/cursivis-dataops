@@ -189,11 +189,13 @@ public sealed partial class DataHubGeminiResponsesGateway : IResponsesGateway
                 new { urns = documentUrn },
                 cancellationToken).ConfigureAwait(false);
             string verified = DataHubMcpClient.GetToolResultText(verifyResult);
-            if (!verified.Contains(documentUrn, StringComparison.Ordinal) ||
-                !verified.Contains(title, StringComparison.OrdinalIgnoreCase))
+            if (!ContainsPersistedValue(verified, documentUrn) ||
+                !ContainsPersistedValue(verified, title) ||
+                !ContainsPersistedValue(verified, trimmed) ||
+                !ContainsPersistedValue(verified, datasetUrn))
             {
                 return DataHubResolutionSaveResult.Failed(
-                    "The resolution was submitted through DataHub MCP, but read-after-write verification did not match the saved document.");
+                    "The resolution was submitted through DataHub MCP, but read-after-write verification did not match the saved document content and related asset.");
             }
 
             return DataHubResolutionSaveResult.Success(documentUrn);
@@ -334,6 +336,18 @@ public sealed partial class DataHubGeminiResponsesGateway : IResponsesGateway
 
     private static string Limit(string value, int maximum) =>
         value.Length <= maximum ? value : value[..maximum];
+
+    internal static bool ContainsPersistedValue(string verifiedText, string expected)
+    {
+        if (verifiedText.Contains(expected, StringComparison.Ordinal))
+        {
+            return true;
+        }
+
+        string encoded = JsonSerializer.Serialize(expected);
+        return encoded.Length >= 2 &&
+            verifiedText.Contains(encoded[1..^1], StringComparison.Ordinal);
+    }
 
     private static string? FindFirstDatasetUrn(string text)
     {
