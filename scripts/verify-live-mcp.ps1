@@ -69,6 +69,46 @@ function Invoke-McpTool {
     return $result
 }
 
+function Assert-McpToolArguments {
+    param(
+        [hashtable]$ToolsByName,
+        [string]$Name,
+        [string[]]$Arguments
+    )
+
+    $tool = $ToolsByName[$Name]
+    if ($null -eq $tool) {
+        throw "Official DataHub MCP Server is missing required tool '$Name'."
+    }
+    if ($null -eq $tool.inputSchema -or $null -eq $tool.inputSchema.properties) {
+        throw "DataHub MCP tool '$Name' did not publish an MCP input schema."
+    }
+
+    $published = @($tool.inputSchema.properties.PSObject.Properties.Name)
+    foreach ($argument in $Arguments) {
+        if ($published -notcontains $argument) {
+            throw "DataHub MCP tool '$Name' no longer exposes expected argument '$argument'. The Cursivis golden-flow contract must be reviewed before demoing."
+        }
+    }
+}
+
+function Assert-McpToolReadOnlyHint {
+    param(
+        [hashtable]$ToolsByName,
+        [string]$Name,
+        [bool]$Expected
+    )
+
+    $tool = $ToolsByName[$Name]
+    if ($null -eq $tool -or $null -eq $tool.annotations) {
+        throw "DataHub MCP tool '$Name' did not publish MCP safety annotations."
+    }
+    $property = $tool.annotations.PSObject.Properties['readOnlyHint']
+    if ($null -eq $property -or [bool]$property.Value -ne $Expected) {
+        throw "DataHub MCP tool '$Name' published an unexpected readOnlyHint. Refusing to trust a changed read/write safety contract."
+    }
+}
+
 try {
     $initialize = Invoke-McpRequest -Method 'initialize' -Params @{
         protocolVersion = '2025-06-18'
@@ -84,16 +124,33 @@ try {
     $process.StandardInput.Flush()
 
     $toolList = Invoke-McpRequest -Method 'tools/list' -Params @{}
-    $available = @($toolList.tools | ForEach-Object { [string]$_.name })
+    $toolsByName = @{}
+    foreach ($tool in @($toolList.tools)) {
+        $toolsByName[[string]$tool.name] = $tool
+    }
+
     $required = @('search', 'get_entities', 'list_schema_fields', 'get_lineage')
     foreach ($tool in $required) {
-        if ($available -notcontains $tool) {
+        if (-not $toolsByName.ContainsKey($tool)) {
             throw "Official DataHub MCP Server is missing required tool '$tool'."
         }
     }
-    if ($available -notcontains 'save_document') {
+    if (-not $toolsByName.ContainsKey('save_document')) {
         throw "Official DataHub MCP Server is missing required write-back tool 'save_document'."
     }
+
+    # Validate the exact live MCP contracts used by the desktop golden flow.
+    # This is intentionally non-mutating: tools/list exposes schemas and MCP
+    # safety annotations, so API drift is caught before a judge reaches Save.
+    Assert-McpToolArguments -ToolsByName $toolsByName -Name 'search' -Arguments @('query', 'num_results', 'offset')
+    Assert-McpToolArguments -ToolsByName $toolsByName -Name 'get_entities' -Arguments @('urns')
+    Assert-McpToolArguments -ToolsByName $toolsByName -Name 'list_schema_fields' -Arguments @('urn', 'limit', 'offset')
+    Assert-McpToolArguments -ToolsByName $toolsByName -Name 'get_lineage' -Arguments @('urn', 'upstream', 'max_hops', 'max_results', 'offset')
+    Assert-McpToolArguments -ToolsByName $toolsByName -Name 'save_document' -Arguments @('document_type', 'title', 'content', 'related_assets')
+    foreach ($tool in $required) {
+        Assert-McpToolReadOnlyHint -ToolsByName $toolsByName -Name $tool -Expected $true
+    }
+    Assert-McpToolReadOnlyHint -ToolsByName $toolsByName -Name 'save_document' -Expected $false
 
     $search = Invoke-McpTool -Name 'search' -Arguments @{ query = '/q analytics+customers'; num_results = 5; offset = 0 }
     $searchJson = $search | ConvertTo-Json -Depth 50 -Compress
@@ -137,7 +194,8 @@ try {
     Write-Host 'Live DataHub MCP preflight passed.' -ForegroundColor Green
     Write-Host "Resolved dataset: $urn"
     Write-Host 'Verified MCP context: deterministic owner, schema, raw.customers upstream, and both downstream blast-radius assets.'
-    Write-Host 'Verified runtime tools: search, get_entities, list_schema_fields, get_lineage; save_document is exposed for the confirmation-gated app flow.'
+    Write-Host 'Verified live MCP schemas and read/write safety annotations for search, get_entities, list_schema_fields, get_lineage, and save_document.'
+    Write-Host 'save_document is exposed for the confirmation-gated app flow; preflight itself performs no mutation.'
 }
 finally {
     try { $process.StandardInput.Close() } catch {}
