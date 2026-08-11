@@ -52,6 +52,10 @@ jobs:
         with:
           node-version: 22
 
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
       - name: Verify PowerShell script syntax
         shell: pwsh
         run: |
@@ -66,6 +70,9 @@ jobs:
             }
           }
           if ($failed) { throw 'PowerShell script syntax validation failed.' }
+
+      - name: Verify deterministic DataHub seed syntax
+        run: python -m py_compile ./scripts/seed_demo_data.py
 
       - name: Verify secrets stay local
         shell: pwsh
