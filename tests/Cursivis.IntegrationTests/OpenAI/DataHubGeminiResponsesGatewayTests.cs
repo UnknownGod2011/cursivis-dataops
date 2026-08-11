@@ -60,6 +60,22 @@ public sealed class DataHubGeminiResponsesGatewayTests
     }
 
     [Fact]
+    public void GroundedWritebackEligibility_ExistsOnlyAfterSuccessfulGroundedGeneration()
+    {
+        var gateway = new DataHubGeminiResponsesGateway();
+        const string datasetUrn = "urn:li:dataset:(urn:li:dataPlatform:demo,analytics.customers,PROD)";
+
+        gateway.ApplyGroundingOutcome(true, datasetUrn, "analytics.customers");
+        Assert.True(gateway.HasGroundedDataset);
+
+        gateway.ApplyGroundingOutcome(false, datasetUrn, "analytics.customers");
+        Assert.False(gateway.HasGroundedDataset);
+
+        gateway.ApplyGroundingOutcome(true, null, "analytics.customers");
+        Assert.False(gateway.HasGroundedDataset);
+    }
+
+    [Fact]
     public async Task SaveResolutionAsync_RejectsEmptyResolutionBeforeAnyMutation()
     {
         var gateway = new DataHubGeminiResponsesGateway();
