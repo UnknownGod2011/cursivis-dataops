@@ -68,7 +68,7 @@ flowchart LR
 
 The runtime agent does **not** substitute tracked example JSON for DataHub. For grounded requests, catalog evidence comes from MCP tools. The Python SDK/GraphQL setup helpers remain useful for creating and verifying the deterministic local catalog before the app launches.
 
-The official MCP process is launched over stdio using `mcp-server-datahub`. Read tools run with mutations disabled. Only the explicit Save flow starts MCP with mutation tools enabled, and no write occurs until the user confirms it in the Cursivis UI.
+The official MCP process is launched over stdio using the pinned `mcp-server-datahub@0.6.0` package. Grounding sessions keep both general mutations and document writes disabled. Only the explicit Save flow starts a separate MCP session with `save_document` enabled; DataHub's unrelated metadata mutation tools remain disabled, and no document write occurs until the user confirms it in the Cursivis UI.
 
 ### Gemini integration
 
@@ -88,7 +88,7 @@ Copy-Item .env.example .env
 .\scripts\run-demo.ps1
 ```
 
-`bootstrap-datahub.ps1` creates an isolated environment under `.tools`, installs DataHub CLI + `uv`, starts the official DataHub Docker quickstart, and makes the official MCP launcher available. `seed-demo-data.ps1` creates and verifies the canonical catalog. `run-demo.ps1` loads local non-secret configuration, verifies the catalog, configures the MCP launcher, builds Release, and starts Cursivis.
+`bootstrap-datahub.ps1` creates an isolated environment under `.tools`, installs DataHub CLI + `uv`, starts the official DataHub Docker quickstart, and makes the official MCP launcher available. `seed-demo-data.ps1` creates and verifies the canonical catalog, including one deterministic SDK-seeded setup document required for the official MCP server to expose document tools on a completely fresh catalog. `run-demo.ps1` loads local non-secret configuration, verifies the catalog, configures the MCP launcher, builds Release, and starts Cursivis.
 
 | Variable | Required | Purpose |
 | --- | --- | --- |
@@ -100,7 +100,7 @@ Copy-Item .env.example .env
 | `DATAHUB_TOKEN` | No for local quickstart | Compatibility token for DataHub helpers |
 | `DATAHUB_GRAPHQL_URL` | Setup helpers only | Used by deterministic verification tooling, not judge-facing grounding |
 | `DATAHUB_MCP_COMMAND` | Normally automatic | Trusted MCP launcher; `run-demo.ps1` points this to isolated `uvx.exe` |
-| `DATAHUB_MCP_PACKAGE` | No | Defaults to `mcp-server-datahub@latest` |
+| `DATAHUB_MCP_PACKAGE` | No | Defaults to pinned `mcp-server-datahub@0.6.0` |
 
 The DataHub UI is normally available at `http://localhost:9002`; local GMS is normally at `http://localhost:8080`.
 
@@ -125,7 +125,7 @@ The canonical `analytics.customers` schema contains:
 - `customer_tier`
 - `updated_at`
 
-The seed defines descriptions, ownership, and lineage, then verifies the metadata exists and the canonical dataset is searchable before setup reports success. If verification fails, the demo fails rather than continuing with fake context.
+The seed defines descriptions, ownership, and lineage. It also creates the deterministic native document `urn:li:document:cursivis-dataops-demo-context`, linked to `analytics.customers`. This setup document is intentionally created through the DataHub Python SDK because the official MCP server hides document tools when a catalog contains no documents; it is **not** a user resolution and does not substitute for the judge-facing MCP write path. The script verifies the document's exact URN, title, content, related asset, catalog metadata, and dataset searchability before setup reports success. If verification fails, the demo fails rather than continuing with fake context.
 
 ## Safety and write-back
 
@@ -154,7 +154,7 @@ The deterministic suite restores locked dependencies, runs the Release build, .N
 - **MCP launcher missing:** rerun `bootstrap-datahub.ps1`; it installs `uvx` inside `.tools/datahub-venv`.
 - **DataHub UI unavailable:** wait for `http://localhost:9002` after quickstart.
 - **DataHub GMS unavailable:** verify `http://localhost:8080` and rerun the seed script.
-- **Demo seed fails:** do not continue; the script intentionally fails if required schema/ownership/lineage/searchability is missing.
+- **Demo seed fails:** do not continue; the script intentionally fails if required schema/ownership/lineage/searchability or the deterministic MCP document-tool bootstrap is missing.
 - **No catalog entity found:** select SQL with a qualified `FROM` or `JOIN` reference that exists in the catalog.
 - **Gemini key missing/rejected:** set `GEMINI_API_KEY` in the process, secure app settings, or `.env` for the development demo.
 - **Authenticated DataHub:** configure `DATAHUB_GMS_URL` and `DATAHUB_GMS_TOKEN`/`DATAHUB_TOKEN` as required by the instance.
