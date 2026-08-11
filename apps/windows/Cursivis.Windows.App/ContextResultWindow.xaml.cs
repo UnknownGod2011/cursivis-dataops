@@ -124,6 +124,10 @@ public sealed partial class ContextResultWindow : Window
         string? operationLabel = null,
         bool? canReplace = null)
     {
+        // A new primary result starts a new review/writeback lifecycle. In
+        // particular, do not carry a prior result's terminal "Saved" state or
+        // armed confirmation into the newly displayed content.
+        ResetDataHubSaveButton();
         _detectedColor = null;
         _presentation = ResultPanelPresentation.FromResult(result, guidedMode);
         if (!string.IsNullOrWhiteSpace(operationLabel))
@@ -152,6 +156,7 @@ public sealed partial class ContextResultWindow : Window
     {
         ArgumentNullException.ThrowIfNull(result);
         ArgumentNullException.ThrowIfNull(color);
+        ResetDataHubSaveButton();
         _detectedColor = color;
         _presentation = ResultPanelPresentation.FromResult(result, guidedMode: false) with
         {
@@ -167,6 +172,7 @@ public sealed partial class ContextResultWindow : Window
 
     public void ShowFailure(string heading, string message)
     {
+        ResetDataHubSaveButton();
         _detectedColor = null;
         _presentation = ResultPanelPresentation.Failure(heading, message);
         ApplyPresentation(_presentation);
@@ -175,6 +181,7 @@ public sealed partial class ContextResultWindow : Window
 
     public void ShowActionOutcome(string message, bool canUndo)
     {
+        ResetDataHubSaveButton();
         _detectedColor = null;
         _presentation = ResultPanelPresentation.ActionOutcome(message, canUndo);
         ApplyPresentation(_presentation);
