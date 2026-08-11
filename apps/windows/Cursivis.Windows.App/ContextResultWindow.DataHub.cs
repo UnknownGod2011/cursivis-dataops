@@ -99,11 +99,11 @@ public sealed partial class ContextResultWindow
         }
     }
 
-    private void ResetDataHubSaveButton()
+    private void ResetDataHubSaveButton(bool isEnabled = true)
     {
         _dataHubSaveArmed = false;
         _dataHubSaveArmedContent = null;
         SaveToDataHubButton.Content = "Save to DataHub";
-        SaveToDataHubButton.IsEnabled = true;
+        SaveToDataHubButton.IsEnabled = isEnabled;
     }
 }
