@@ -21,6 +21,7 @@ public sealed partial class DataHubGeminiResponsesGateway : IResponsesGateway
     private readonly object _groundingGate = new();
     private string? _lastGroundedDatasetUrn;
     private string? _lastGroundedDatasetName;
+    private string? _lastGroundedResultContent;
 
     public bool HasGroundedDataset
     {
@@ -28,7 +29,8 @@ public sealed partial class DataHubGeminiResponsesGateway : IResponsesGateway
         {
             lock (_groundingGate)
             {
-                return !string.IsNullOrWhiteSpace(_lastGroundedDatasetUrn);
+                return !string.IsNullOrWhiteSpace(_lastGroundedDatasetUrn) &&
+                    _lastGroundedResultContent is not null;
             }
         }
     }
@@ -52,7 +54,11 @@ public sealed partial class DataHubGeminiResponsesGateway : IResponsesGateway
                 configuration,
                 grounding.Context,
                 cancellationToken).ConfigureAwait(false);
-            ApplyGroundingOutcome(result.Succeeded, grounding.DatasetUrn, grounding.DatasetName);
+            ApplyGroundingOutcome(
+                result.Succeeded,
+                grounding.DatasetUrn,
+                grounding.DatasetName,
+                GetEligibleWritebackContent(result.Json));
             return result;
         }
         catch (GeminiGatewayException exception)
@@ -144,15 +150,22 @@ public sealed partial class DataHubGeminiResponsesGateway : IResponsesGateway
 
         string? datasetUrn;
         string? datasetName;
+        string? groundedResultContent;
         lock (_groundingGate)
         {
             datasetUrn = _lastGroundedDatasetUrn;
             datasetName = _lastGroundedDatasetName;
+            groundedResultContent = _lastGroundedResultContent;
         }
-        if (string.IsNullOrWhiteSpace(datasetUrn))
+        if (string.IsNullOrWhiteSpace(datasetUrn) || groundedResultContent is null)
         {
             return DataHubResolutionSaveResult.Failed(
                 "No DataHub-grounded dataset is associated with this result. Run a grounded data request first.");
+        }
+        if (!string.Equals(reviewed, groundedResultContent, StringComparison.Ordinal))
+        {
+            return DataHubResolutionSaveResult.Failed(
+                "This reviewed result is no longer the exact Gemini result bound to the active DataHub MCP grounding. Generate and review the grounded result again before saving.");
         }
 
         GeminiConfiguration configuration;
@@ -486,9 +499,38 @@ public sealed partial class DataHubGeminiResponsesGateway : IResponsesGateway
         return references;
     }
 
-    internal void ApplyGroundingOutcome(bool succeeded, string? datasetUrn, string? datasetName)
+    internal static string? GetEligibleWritebackContent(string? json)
     {
-        if (!succeeded || string.IsNullOrWhiteSpace(datasetUrn))
+        if (string.IsNullOrWhiteSpace(json))
+        {
+            return null;
+        }
+
+        try
+        {
+            using JsonDocument document = JsonDocument.Parse(json);
+            if (!document.RootElement.TryGetProperty("finalContent", out JsonElement content) ||
+                content.ValueKind != JsonValueKind.String)
+            {
+                return null;
+            }
+
+            string? value = content.GetString();
+            return string.IsNullOrWhiteSpace(value) ? null : value;
+        }
+        catch (JsonException)
+        {
+            return null;
+        }
+    }
+
+    internal void ApplyGroundingOutcome(
+        bool succeeded,
+        string? datasetUrn,
+        string? datasetName,
+        string? groundedResultContent)
+    {
+        if (!succeeded || string.IsNullOrWhiteSpace(datasetUrn) || groundedResultContent is null)
         {
             ClearGroundingTarget();
             return;
@@ -498,6 +540,7 @@ public sealed partial class DataHubGeminiResponsesGateway : IResponsesGateway
         {
             _lastGroundedDatasetUrn = datasetUrn;
             _lastGroundedDatasetName = datasetName;
+            _lastGroundedResultContent = groundedResultContent;
         }
     }
 
@@ -507,6 +550,7 @@ public sealed partial class DataHubGeminiResponsesGateway : IResponsesGateway
         {
             _lastGroundedDatasetUrn = null;
             _lastGroundedDatasetName = null;
+            _lastGroundedResultContent = null;
         }
     }
 
