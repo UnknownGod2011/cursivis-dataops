@@ -2,8 +2,10 @@
 
 This script intentionally uses DataHub's public Python SDK rather than tracked
 example JSON. It creates the exact dataset referenced by the golden SQL demo,
-adds an owner and downstream lineage, and verifies that DataHub can read the
-metadata back before returning success.
+adds an owner and downstream lineage, and seeds one deterministic native
+Document so the official MCP Server exposes its document tools on a completely
+fresh catalog. Runtime grounding and reviewed resolution write-back still happen
+through MCP in the judge-facing application flow.
 """
 
 from __future__ import annotations
@@ -16,13 +18,22 @@ import urllib.error
 import urllib.request
 
 from datahub.metadata.urns import CorpUserUrn, DatasetUrn
-from datahub.sdk import DataHubClient, Dataset
+from datahub.sdk import DataHubClient, Dataset, Document
 
 GMS_URL = os.getenv("DATAHUB_GMS_URL", "http://localhost:8080").rstrip("/")
 GRAPHQL_URL = os.getenv("DATAHUB_GRAPHQL_URL", f"{GMS_URL}/api/graphql")
 TOKEN = os.getenv("DATAHUB_TOKEN") or None
 PLATFORM = "postgres"
 ENV = "PROD"
+DEMO_DOCUMENT_ID = "cursivis-dataops-demo-context"
+DEMO_DOCUMENT_URN = f"urn:li:document:{DEMO_DOCUMENT_ID}"
+DEMO_DOCUMENT_TITLE = "Cursivis DataOps Demo Context"
+DEMO_DOCUMENT_TEXT = (
+    "Deterministic setup document for the Cursivis DataOps local demo. "
+    "It exists so a fresh DataHub catalog advertises the official MCP document "
+    "tools before the first user-confirmed resolution write-back. Judge-facing "
+    "runtime reads and reviewed resolution writes are performed through MCP."
+)
 
 DATASETS = {
     "raw.customers": [
@@ -96,6 +107,21 @@ def seed() -> None:
     )
     print("Seeded upstream and downstream lineage.")
 
+    # The official MCP server hides document tools when a catalog has no
+    # documents. Seed one stable setup document through the SDK so a brand-new
+    # DataHub Core instance can expose save_document before the first confirmed
+    # app write. This is catalog bootstrap only; reviewed resolutions are never
+    # seeded here and remain confirmation-gated MCP mutations in Cursivis.
+    demo_document = Document.create_document(
+        id=DEMO_DOCUMENT_ID,
+        title=DEMO_DOCUMENT_TITLE,
+        text=DEMO_DOCUMENT_TEXT,
+        subtype="Runbook",
+        related_assets=[str(target_urn)],
+    )
+    client.entities.upsert(demo_document)
+    print(f"Seeded deterministic MCP document-tool bootstrap: {demo_document.urn}")
+
 
 def verify() -> None:
     target = str(dataset_urn("analytics.customers"))
@@ -105,6 +131,19 @@ def verify() -> None:
         urn
         schemaMetadata { fields { fieldPath nativeDataType description } }
         ownership { owners { owner { urn } } }
+      }
+    }
+    """
+    document_query = """
+    query Document($urn: String!) {
+      document(urn: $urn) {
+        urn
+        subType
+        info {
+          title
+          contents { text }
+          relatedAssets { asset { urn } }
+        }
       }
     }
     """
@@ -138,6 +177,23 @@ def verify() -> None:
     }
     if "urn:li:corpuser:datahub" not in owners:
         raise RuntimeError(f"Verification failed: expected owner missing. Found: {sorted(x for x in owners if x)}")
+
+    document_data = graphql(document_query, {"urn": DEMO_DOCUMENT_URN})
+    document = document_data.get("document")
+    if not document:
+        raise RuntimeError("Verification failed: deterministic MCP bootstrap document was not readable from DataHub.")
+    document_info = document.get("info") or {}
+    related_assets = {
+        ((item.get("asset") or {}).get("urn"))
+        for item in (document_info.get("relatedAssets") or [])
+    }
+    if (
+        document.get("urn") != DEMO_DOCUMENT_URN
+        or document_info.get("title") != DEMO_DOCUMENT_TITLE
+        or ((document_info.get("contents") or {}).get("text")) != DEMO_DOCUMENT_TEXT
+        or target not in related_assets
+    ):
+        raise RuntimeError("Verification failed: deterministic MCP bootstrap document content or related asset did not match.")
 
     downstream = graphql(
         lineage_query,
@@ -173,7 +229,7 @@ def verify() -> None:
     if not resolved:
         raise RuntimeError("Verification failed: DataHub search did not index analytics.customers in time.")
 
-    print("Verified canonical dataset, schema, owner, downstream lineage, and search resolution.")
+    print("Verified canonical dataset, schema, owner, downstream lineage, search resolution, and deterministic MCP document-tool bootstrap.")
 
 
 def main() -> int:
