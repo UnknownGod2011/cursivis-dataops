@@ -3,6 +3,7 @@ param()
 
 $ErrorActionPreference = 'Stop'
 $root = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
+$mcpRequestTimeout = [TimeSpan]::FromSeconds(60)
 
 if ([string]::IsNullOrWhiteSpace($env:DATAHUB_GMS_URL)) {
     $env:DATAHUB_GMS_URL = 'http://localhost:8080'
@@ -42,6 +43,11 @@ $psi.Environment['PYTHONUNBUFFERED'] = '1'
 $process = [System.Diagnostics.Process]::Start($psi)
 if ($null -eq $process) { throw 'Could not start the official DataHub MCP Server.' }
 
+# stderr may contain startup diagnostics. Drain it continuously so a verbose
+# server cannot fill the redirected pipe and deadlock the judge-facing preflight.
+# Do not print it because it may contain local catalog/configuration details.
+$stderrDrain = $process.StandardError.ReadToEndAsync()
+
 $nextId = 0
 function Invoke-McpRequest {
     param([string]$Method, [hashtable]$Params)
@@ -52,7 +58,11 @@ function Invoke-McpRequest {
     $process.StandardInput.Flush()
 
     while ($true) {
-        $line = $process.StandardOutput.ReadLine()
+        $readTask = $process.StandardOutput.ReadLineAsync()
+        if (-not $readTask.Wait($mcpRequestTimeout)) {
+            throw "DataHub MCP request '$Method' timed out after $([int]$mcpRequestTimeout.TotalSeconds) seconds."
+        }
+        $line = $readTask.Result
         if ($null -eq $line) { throw "DataHub MCP Server closed stdout while waiting for '$Method'." }
         try { $message = $line | ConvertFrom-Json -Depth 50 } catch { continue }
         if ($null -eq $message.id -or [long]$message.id -ne $id) { continue }
@@ -202,5 +212,6 @@ finally {
     if (-not $process.HasExited) {
         try { $process.Kill($true) } catch {}
     }
+    try { $null = $stderrDrain.Wait([TimeSpan]::FromSeconds(5)) } catch {}
     $process.Dispose()
 }
