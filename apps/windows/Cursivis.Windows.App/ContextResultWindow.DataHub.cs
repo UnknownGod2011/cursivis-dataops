@@ -6,6 +6,7 @@ namespace Cursivis.Windows.App;
 
 public sealed partial class ContextResultWindow
 {
+    private const int MaximumDataHubResolutionCharacters = 24_000;
     private bool _dataHubSaveArmed;
     private string? _dataHubSaveArmedContent;
 
@@ -28,6 +29,20 @@ public sealed partial class ContextResultWindow
             ShowNotice(
                 "Nothing to save",
                 "Generate and review a grounded result before saving organizational knowledge.",
+                InfoBarSeverity.Error);
+            return;
+        }
+
+        // Never ask the user to confirm one artifact and then persist a different,
+        // silently truncated artifact. The MCP write path has a bounded document
+        // size, so an oversized reviewed result must fail visibly before the
+        // confirmation is armed and before any mutation process is started.
+        if (reviewedContent.Length > MaximumDataHubResolutionCharacters)
+        {
+            ResetDataHubSaveButton();
+            ShowNotice(
+                "Resolution too large to save exactly",
+                $"This reviewed result is {reviewedContent.Length:N0} characters. DataHub write-back is limited to {MaximumDataHubResolutionCharacters:N0} characters, so Cursivis will not truncate or publish it. Shorten the reviewed result and try again.",
                 InfoBarSeverity.Error);
             return;
         }
