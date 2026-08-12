@@ -197,7 +197,11 @@ public sealed partial class OpenAiPage : Page
         try
         {
             using var request = new HttpRequestMessage(HttpMethod.Post, settings.DataHubGraphQlUrl);
-            string? token = Environment.GetEnvironmentVariable("DATAHUB_TOKEN")?.Trim();
+            string? token = Environment.GetEnvironmentVariable("DATAHUB_GMS_TOKEN")?.Trim();
+            if (string.IsNullOrWhiteSpace(token))
+            {
+                token = Environment.GetEnvironmentVariable("DATAHUB_TOKEN")?.Trim();
+            }
             if (!string.IsNullOrWhiteSpace(token))
             {
                 request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
