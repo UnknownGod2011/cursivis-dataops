@@ -22,7 +22,7 @@ from datahub.sdk import DataHubClient, Dataset, Document
 
 GMS_URL = os.getenv("DATAHUB_GMS_URL", "http://localhost:8080").rstrip("/")
 GRAPHQL_URL = os.getenv("DATAHUB_GRAPHQL_URL", f"{GMS_URL}/api/graphql")
-TOKEN = os.getenv("DATAHUB_TOKEN") or None
+TOKEN = os.getenv("DATAHUB_GMS_TOKEN") or os.getenv("DATAHUB_TOKEN") or None
 PLATFORM = "postgres"
 ENV = "PROD"
 DEMO_DOCUMENT_ID = "cursivis-dataops-demo-context"
