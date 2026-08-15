@@ -13,16 +13,31 @@ $dataHubCliVersion = '1.6.0.15'
 if (-not (Get-Command docker -ErrorAction SilentlyContinue)) { throw 'Docker Desktop is required. Install and start Docker, then rerun this script.' }
 docker info *> $null
 if ($LASTEXITCODE -ne 0) { throw 'Docker is installed but not running. Start Docker Desktop, then rerun this script.' }
-if (-not (Get-Command python -ErrorAction SilentlyContinue)) { throw 'Python 3.11+ is required for DataHub and the official DataHub MCP Server.' }
+if (-not (Get-Command py -ErrorAction SilentlyContinue) -and -not (Get-Command python -ErrorAction SilentlyContinue)) { throw 'Python 3.11+ is required for DataHub and the official DataHub MCP Server.' }
 
-$pythonVersion = python -c "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')"
+# Prefer the Windows launcher so an older `python` alias cannot mask an
+# installed 3.11+ interpreter (common on clean judge machines).
+$pythonCommand = 'python'
+$pythonArguments = @()
+if (Get-Command py -ErrorAction SilentlyContinue) {
+    $pythonCommand = 'py'
+    $pythonArguments = @('-3.12')
+    & $pythonCommand @pythonArguments -c "import sys; raise SystemExit(0 if sys.version_info >= (3,11) else 1)" *> $null
+    if ($LASTEXITCODE -ne 0) {
+        $pythonArguments = @('-3.11')
+        & $pythonCommand @pythonArguments -c "import sys; raise SystemExit(0 if sys.version_info >= (3,11) else 1)" *> $null
+        if ($LASTEXITCODE -ne 0) { $pythonCommand = 'python'; $pythonArguments = @() }
+    }
+}
+
+$pythonVersion = & $pythonCommand @pythonArguments -c "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')"
 if ($LASTEXITCODE -ne 0) { throw 'Unable to determine the installed Python version.' }
 $parts = $pythonVersion.Trim().Split('.')
 if ([int]$parts[0] -lt 3 -or ([int]$parts[0] -eq 3 -and [int]$parts[1] -lt 11)) {
     throw "Python 3.11+ is required by the official DataHub MCP Server. Found Python $pythonVersion."
 }
 
-if (-not (Test-Path $venv)) { python -m venv $venv }
+if (-not (Test-Path $venv)) { & $pythonCommand @pythonArguments -m venv $venv }
 $venvPython = Join-Path $venv 'Scripts\python.exe'
 $cli = Join-Path $venv 'Scripts\datahub.exe'
 $uvx = Join-Path $venv 'Scripts\uvx.exe'
